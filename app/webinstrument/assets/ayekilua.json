@@ -1,0 +1,15 @@
+{
+    "<start>":["<inicio>, <premisaPrincipal> Ahora se pregunta si algun dia <verbos-futuro> como en los libros de fantasía."],
+    "<inicio>":["<determinante> <sustantivo> <verbos-presente> cada <tiempo>"],
+    "<premisaPrincipal>":["cuando va <verbos-gerundio> <cadaCuando> <estadoInterno> cuando <verbos-pasados> la vida."],
+    "<estadoInterno>":["se acuerda de", "se olvida de", "se siente abrumado de"],
+    "<cadaCuando>":["a veces", "siempre", "nunca", "pero solo si sale el sol", "cada <tiempo>", "luego de ver los peces brillar por el sol"],
+    "<tiempo>":["ciclo lunar", "mañana","día","año","vez que el otoño pinta los arboles","que una gota del oceano se mezcla con petroleo", "que el viento sopla", "que las nubes se disuelven", "marea alta"],
+    "<verbos-presente>":["corre","camina","nada","sueña","repara","alivia"],
+    "<verbos-gerundio>":["corriendo","nadando","buscando","pintando","viviendo","rompiendo"],
+    "<verbos-pasados>":["entendió","divisó","caminó","perpetró","cambío","levantó","reaccionó","bajó","olió","buscó","encontró"],
+    "<verbos-futuro>":["volará","caminará","escribirá","pintará","taladrará","borrará"],
+    "<determinante>":["un","el"],
+    "<sustantivo>":["plantío","metal","fotón", "mappeo"],
+    "<adjetivos>":["lumínico","incandescente","fugaz"]
+}
