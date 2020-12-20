@@ -1,7 +1,7 @@
 html {
 	overflow-y: hidden;
 	overflow-x: hidden;
-	background-color: black;
+	background-color: rgba(0, 0, 0, 0);;
 }
 
 html, body {
@@ -24,7 +24,7 @@ canvas {
         height: 156px;
         width: 100%;
         background: #fbbc05;
-        color: rgba(0,0,0,.6);
+        color: rgba(0,0,0,0);
         line-height: 30px;
         font-size: 20px;
         letter-spacing: 0.02em;

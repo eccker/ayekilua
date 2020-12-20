@@ -1,29 +1,33 @@
-let app = require('express')();
-var expressWs = require('express-ws')(app);
-
-let serveStatic = require('serve-static');
-const rp = require('request-promise');
-
-
-// var server = require('http').Server(app);
 require('console-stamp')(console, '[HH:MM:ss.l]');
-// gzip/deflate outgoing responses
-let compression = require('compression');
-app.use(compression({
-	level: 9
-}));
-// store session state in browser cookie
-let cookieSession = require('cookie-session');
-app.use(cookieSession({
-	keys: ['secret1', 'secret2']
-}));
-// parse urlencoded request bodies into req.body
-let bodyParser = require('body-parser');
-app.use(bodyParser.urlencoded({
-	extended: false
-}));
 
+let app = require('express')();
+let serveStatic = require('serve-static');
+let compression = require('compression');
+let cookieSession = require('cookie-session');
 let fs = require('fs');
+let bodyParser = require('body-parser')
+let port = process.env.PORT || 9002;
+
+let makeSecret = (length) => {
+	let result           =  ``
+	let characters       = `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`  
+	let charactersLength = characters.length
+	for ( let i = 0; i < length; i++ ) {
+	   result += characters.charAt(Math.floor(Math.random() * charactersLength))
+	}
+	return result
+ }
+ 
+let secret1 = makeSecret(32)
+let secret2 = makeSecret(32)
+console.log(`secret1: ${secret1}, secret2: ${secret2}`)
+// gzip/deflate outgoing responses
+app.use(compression({level: 9}))
+// store session state in browser cookie
+app.use(cookieSession({keys: [`${secret1}`, `${secret2}`]}))
+// parse urlencoded request bodies into req.body
+app.use(bodyParser.urlencoded({extended: false}))
+
 app.get('/privacy', (req, res) => {
 	console.log(`privacy requested`)
 	const privacy = require('./legal.js').privacy;
@@ -32,61 +36,26 @@ app.get('/privacy', (req, res) => {
 	console.log(`terms requested`)
 	const terms = require('./legal.js').terms;
 	res.send(terms);
-}).ws('/planta', function (ws, req) {
-	ws.on('message', function (msg) {
-		//console.log(`A message: ${msg} was recived through websocket from ESP`)
-		if (msg.includes(`touched`)) {
-			let matches = msg.match(/(\d+)/);
-			//console.log(matches[0])
-			io.emit("noteOn", matches[0])
-		} else if(msg.includes(`release`)){
-			let matches = msg.match(/(\d+)/);
-			//console.log(matches[0])
-			io.emit("noteOff", matches[0])
-		} else if(msg.includes(`habitat`)){
-			let [habJson, jsonOBJ] = JSON.parse(msg.replace(/[^ -~]+/g, ""))
-			console.log(`habJson is: ${habJson}`);
-			console.log(`jsonOBJ is: ${JSON.stringify(jsonOBJ)}`);
-			io.emit(habJson,jsonOBJ)
-		} else if(msg.includes(`playNote`)){
-			let [endpoint, dataObj] = JSON.parse(msg.replace(/[^ -~]+/g, ""))
-			console.log(`endpoint is: ${endpoint}`);
-			console.log(`dataObj is: ${JSON.stringify(dataObj)}`);
-			io.emit(endpoint,dataObj)
-		}
-
-		ws.send(msg);
-	});
-});
-
-let port = 9002;
-
-// const server = app.use(serveStatic(__dirname + '/webinstrument/build/es6-bundled/')).listen(port, () => {
-// 	console.log('\'Positio\' esta al aire desde un container con cicd por el puerto ' + port);
-// });
+})
 
 const server = app.use(serveStatic(__dirname + '/webinstrument/')).listen(port, () => {
-	console.log('\'Ayekilua\' esta al aire  el puerto ' + port);
+	console.log(`'Ayekilua' esta corriendo por el puerto ${port}`)
 });
 
-
-// -------- socket io secction START
-let io = require('socket.io')(server)
-// io.listen(server)
+// -------- socket io section START
+let io = require('socket.io')(server, { transports: ['websocket'] })
 io.on('connection', (socket) => {
-	console.log('Un cliente se ha conectado con id: ', socket.id);
+	console.log('Un cliente se ha conectado con id: ', socket.id);	
+	
 	socket.on(`noteOn`, (data) => {
-		console.log(`El cliente ${socket.id} envio un "noteOn" con data: `, data);
-		io.emit(`noteOn received`)
+		console.log(`El cliente ${socket.id} envio un "noteOn" con data: ${data} from socker.id: ${socket.id}`);
+
 	})
+
 	socket.on(`LED`, (data) => {
-		console.log(`El cliente ${socket.id} envio un "LED" con data: `, data);
-		io.emit(`LED received`)
-		//
-		//console.log(expressWs.getWss().clients);
-		expressWs.app.ws('/planta', function (ws, req) {
-			ws.send(data)
-		})		//
+		console.log(`El cliente ${socket.id} envio un "LED" con datos: `, data);
+		io.emit(`habitat`, `LED recibido, contestando por habitat`);
+		io.to(socket.id).emit(`habitat`,`LED recibido, contestando por mensaje privado al cliente ${socket.id}`)
 	})
 })
 // --------- socket io section END

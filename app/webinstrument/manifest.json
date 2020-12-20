@@ -1,7 +1,7 @@
 {
-  "name": "Efecto Tripidesvelo - Posición",
-  "short_name": "ETD",
-  "start_url": "/build/es5-bundled/",
+  "name": "Ayekilua - Meditative Axolotl Game by Efecto Tripidesvelo",
+  "short_name": "Ayekilua by ETD",
+  "start_url": "/",
   "display": "standalone",
   "theme_color": "#181f13",
   "background_color": "#fbbc05",
