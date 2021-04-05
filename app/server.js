@@ -37,7 +37,7 @@ app.get('/privacy', (req, res) => {
 	const terms = require('./legal.js').terms;
 	res.send(terms);
 })
-
+//const server = app.use(serveStatic(__dirname + '/webinstrument/build/es6-bundled/')).listen(port, () => {
 const server = app.use(serveStatic(__dirname + '/webinstrument/')).listen(port, () => {
 	console.log(`'Ayekilua' esta corriendo por el puerto ${port}`)
 });

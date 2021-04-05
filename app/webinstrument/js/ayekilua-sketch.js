@@ -118,7 +118,7 @@ let sketch = (p) => {
 			}
 		)
 
-		ayekiluaElement = document.getElementById('path10')
+		ayekiluaElement = document.getElementById('ayekiluaSVGPath')
 		ayekiluaPath = ayekiluaElement.getAttribute('d')
 		ayekiluaCommands = ayekiluaPath.split(/(?=[lmcLMC])/)
 
