@@ -54,8 +54,7 @@ app.get('/privacy', (req, res) => {
 	const hashid = `${makeSecret(32)}_${decoded.user.id}`
 	const hashname = `${makeSecret(32)}_${decoded.user.name}`
 	const hashnounce = `${makeSecret(32)}_${decoded.user.nounce}`
-	console.log(uname)
-	console.log(hpssd)
+
 	let oPayload = {
 			"user": {
 				"id": hashid ,
@@ -71,7 +70,6 @@ app.get('/privacy', (req, res) => {
 	// TODO send token by email when is registering
 	res.send(token)
 }).get('/auth/:authTokenStr', (req, res) => {
-	console.log(`auth token requested`)
 	let decoded
 	try {
 		decoded = jsonwebtoken.verify(req.params.authTokenStr, 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
@@ -84,8 +82,8 @@ app.get('/privacy', (req, res) => {
 })
 
 // -------- RUN SERVER
-//const server = app.use(serveStatic(__dirname + '/webinstrument/build/es6-bundled/')).listen(port, () => {
-const server = app.use(serveStatic(__dirname + '/webinstrument/')).listen(port, () => {
+const server = app.use(serveStatic(__dirname + '/webinstrument/build/es6-bundled/')).listen(port, () => {
+// const server = app.use(serveStatic(__dirname + '/webinstrument/')).listen(port, () => {
 	console.log(`'Ayekilua' esta corriendo por el puerto ${port}`)
 })
 
@@ -160,8 +158,8 @@ io.on('connection', (socket) => {
 		} catch (err) {
 			return null;
 		}
-		console.log(`El cliente ${socket.id} envio un "LED" con datos decodificados: `, decoded2)
-		console.log(`ID del cliente es: ${id} `)
+		// console.log(`El cliente ${socket.id} envio un "LED" con datos decodificados: `, decoded2)
+		// console.log(`ID del cliente es: ${id} `)
 		io.emit(`color`, decoded2.user.color)
 		io.emit(`position`, [decoded2.user.mouseX, decoded2.user.mouseY])
 		
