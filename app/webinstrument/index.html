@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<base href="/">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+
+		<meta property="fb:app_id" content="APP_ID" />
+		<meta property="og:title" content="Ayekilua by Efecto Tripidesvelo & Playa Multimedia Games" />
+		<meta property="og:description" content="Ayekilua - Meditative Axolotl Game by Efecto Tripidesvelo & Playa Multimedia Games" />
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://ayekilua.efectotripidesvelo.com/" />
+		<meta property="og:image" content="https://efectotripidesvelo.com/base.jpg" />
+		<meta property="og:site_name" content="Ayekilua - Meditative Axolotl Game" />
+		<meta name="twitter:title" content="Efecto Tripidesvelo" />
+		<meta name="twitter:description" content="Ayekilua - Meditative Axolotl Game"/>
+		<meta name="twitter:image" content="https://efectotripidesvelo.com/tbase.jpg"/>
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@" />
+		<meta name="twitter:creator" content="@" />
+
+		<!-- <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" /> -->
+		<meta name="viewport" content="width=device-width, initial-scale=1,shrink-to-fit=no">
+		<meta name="fragment" content="!">
+
+		<title>Ayekilua</title>
+		<meta name="description" content="Ayekilua - Meditative Axolotl Game by Efecto Tripidesvelo & Playa Multimedia Games" />
+		<meta name="author" content="eccker">
+
+		<link rel="stylesheet" href="css/styles.css">
+
+		<link rel="dns-prefetch" href="//apis.google.com">
+		<link rel="dns-prefetch" href="//ajax.googleapis.com">
+		<link rel="dns-prefetch" href="//www.google-analytics.com">
+		<link rel="dns-prefetch" href="//twitter.com">
+		<link rel="dns-prefetch" href="//p.twitter.com">
+		<link rel="dns-prefetch" href="//platform.tumblr.com">
+		<link rel="dns-prefetch" href="//platform.twitter.com">
+
+		<link rel="icon" href="imgs/favico.ico">
+
+		<!-- See https://goo.gl/OOhYW5 -->
+		<link rel="manifest" href="manifest.json">
+
+		<!-- See https://goo.gl/qRE0vM -->
+		<meta name="theme-color" content="#181f13">
+
+		<!-- Add to homescreen for Chrome on Android. Fallback for manifest.json -->
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="application-name" content="Ayekilua">
+
+		<!-- Add to homescreen for Safari on iOS -->
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style"
+			content="black-translucent">
+		<meta name="apple-mobile-web-app-title" content="Ayekilua">
+
+		<!-- Homescreen icons -->
+		<link rel="apple-touch-icon" href="imgs/icons48.png">
+		<link rel="apple-touch-icon" sizes="96x96" href="imgs/icons96.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="imgs/icons144.png">
+		<link rel="apple-touch-icon" sizes="192x192" href="imgs/icons192.png">
+
+		<!-- Tile icon for Windows 8 (144x144 + tile color) -->
+		<meta name="msapplication-TileImage" content="imgs/icons144.png">
+		<meta name="msapplication-TileColor" content="#fbbc05">
+		<meta name="msapplication-tap-highlight" content="no">
+
+	
+		<script type="text/javascript">
+			let sha256 = (ascii) => {
+				let rightRotate = (value, amount) => {
+					return (value>>>amount) | (value<<(32 - amount))
+				}
+				
+				let mathPow = Math.pow
+				let maxWord = mathPow(2, 32)
+				let lengthProperty = 'length'
+				let i, j
+				let result = ''
+				let words = []
+				let asciiBitLength = ascii[lengthProperty]*8
+				
+				//* caching results is optional - remove/add slash from front of this line to toggle
+				// Initial hash value: first 32 bits of the fractional parts of the square roots of the first 8 primes
+				// (we actually calculate the first 64, but extra values are just ignored)
+				let hash = sha256.h = sha256.h || []
+				// Round constants: first 32 bits of the fractional parts of the cube roots of the first 64 primes
+				let k = sha256.k = sha256.k || []
+				let primeCounter = k[lengthProperty]
+				/*/
+				let hash = [], k = [];
+				let primeCounter = 0;
+				//*/
+				let isComposite = {}
+				for (let candidate = 2; primeCounter < 64; candidate++) {
+					if (!isComposite[candidate]) {
+						for (i = 0; i < 313; i += candidate) {
+							isComposite[i] = candidate
+						}
+						hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0
+						k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0
+					}
+				}
+				ascii += '\x80' // Append Ƈ' bit (plus zero padding)
+				while (ascii[lengthProperty]%64 - 56) ascii += '\x00' // More zero padding
+				for (i = 0; i < ascii[lengthProperty]; i++) {
+					j = ascii.charCodeAt(i)
+					if (j>>8) return; // ASCII check: only accept characters in range 0-255
+					words[i>>2] |= j << ((3 - i)%4)*8
+				}
+				words[words[lengthProperty]] = ((asciiBitLength/maxWord)|0)
+				words[words[lengthProperty]] = (asciiBitLength)
+				// process each chunk
+				for (j = 0; j < words[lengthProperty];) {
+					let w = words.slice(j, j += 16); // The message is expanded into 64 words as part of the iteration
+					let oldHash = hash
+					// This is now the undefinedworking hash", often labelled as letiables a...g
+					// (we have to truncate as well, otherwise extra entries at the end accumulate
+					hash = hash.slice(0, 8)
+					for (i = 0; i < 64; i++) {
+						let i2 = i + j
+						// Expand the message into 64 words
+						// Used below if 
+						let w15 = w[i - 15], w2 = w[i - 2]
+						// Iterate
+						let a = hash[0], e = hash[4]
+						let temp1 = hash[7]
+							+ (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) // S1
+							+ ((e&hash[5])^((~e)&hash[6])) // ch
+							+ k[i]
+							// Expand the message schedule if needed
+							+ (w[i] = (i < 16) ? w[i] : (
+									w[i - 16]
+									+ (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3)) // s0
+									+ w[i - 7]
+									+ (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10)) // s1
+								)|0
+							)
+						// This is only used once, so *could* be moved below, but it only saves 4 bytes and makes things unreadble
+						let temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) // S0
+							+ ((a&hash[1])^(a&hash[2])^(hash[1]&hash[2])) // maj   
+						hash = [(temp1 + temp2)|0].concat(hash); // We don't bother trimming off the extra ones, they're harmless as long as we're truncating when we do the slice()
+						hash[4] = (hash[4] + temp1)|0
+					}   
+					for (i = 0; i < 8; i++) {
+						hash[i] = (hash[i] + oldHash[i])|0
+					}
+				}
+				for (i = 0; i < 8; i++) {
+					for (j = 3; j + 1; j--) {
+						let b = (hash[i]>>(j*8))&255
+						result += ((b < 16) ? 0 : '') + b.toString(16)
+					}
+				}
+				return result
+			}
+
+			let writeCookie = (value, days) => {
+				let date, expires
+				if (days) {
+					date = new Date()
+					date.setTime(date.getTime()+(days*24*60*60*1000))
+					expires = "; expires="+date.toGMTString()
+				} else {
+					expires = ""
+				}
+				document.cookie = "ayekiluaapp=" + window.btoa(value) + expires + "; path=/";
+			}
+
+			let makeSecret = (length) => {
+				let result           =  ``
+				let characters       = `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`  
+				let charactersLength = characters.length
+				for ( let i = 0; i < length; i++ ) {
+					result += characters.charAt(Math.floor(Math.random() * charactersLength))
+				}
+				return result
+			}
+			let getJSON = (url, callback) => {
+				var xhr = new XMLHttpRequest()
+				xhr.open('GET', url, true)
+				xhr.responseType = 'html'
+				xhr.onload = () => {
+					var status = xhr.status
+					if (status == 200) {
+						callback(null, xhr.response)
+					} else {
+						callback(status)
+					}
+				}
+				xhr.send()
+			}
+
+			window.onunload = () => {
+				socket.removeAllListeners()
+				return
+			}
+
+			let getCookie = (name) => {
+				let dc = document.cookie
+				let prefix = name + "="
+				let begin = dc.indexOf("; " + prefix)
+				let end
+				if (begin == -1) 
+					{
+						begin = dc.indexOf(prefix)
+						if (begin != 0) return null
+					}
+				else
+					{
+						begin += 2
+						end = document.cookie.indexOf(";", begin)
+						if (end == -1) {
+						end = dc.length
+						}
+					}
+				// because unescape has been deprecated, replaced with decodeURI
+				//return unescape(dc.substring(begin + prefix.length, end));
+				return decodeURI(dc.substring(begin + prefix.length, end))
+			} 
+
+			let uJWT
+			window.history.forward()
+			let noBack = () => { window.history.forward() }
+
+			let loadAfterOnload = () => {
+				let userCookie = getCookie("ayekiluaapp")
+				console.log(userCookie)
+				userCookie === null?uJWT = 0:uJWT = 1
+				// Generate a RHUID and store it on localstorage
+				let script = document.createElement('script')
+				script.onload = () => {
+					if (uJWT === 0) {
+						let oHeader = { alg: 'HS256', typ: 'JWT' }
+						let oPayload = {
+								"user": {
+									"id": `${makeSecret(32)}`,
+									"name": `${makeSecret(32)}`,
+									"nounce": `${makeSecret(32)}`,
+								},
+								"credentials":{
+									"username":`usertest`,
+									"hashedpassword":`${sha256("hashedpassword4usertest")}`
+								}
+						}
+						let sHeader = JSON.stringify(oHeader)
+						let sPayload = JSON.stringify(oPayload)
+						// TODO this must be requested as an API request
+						let preuserJWT = KJUR.jws.JWS.sign("HS256", sHeader, sPayload, "zZHxtFcGrlychfSLKzv1Kg80uaK4zAM8")
+						getJSON(`https://ayekilua.efectotripidesvelo.com/token/${preuserJWT}`,  (err, data) => {
+							if (err != null) {
+								console.error(err)
+							} else {
+								console.log(`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% `)
+								console.log(data)
+								window.localStorage.setItem('userJWT', data)
+								writeCookie(data, 1)
+								let userJWT = window.localStorage.getItem('userJWT')
+								getJSON(`https://ayekilua.efectotripidesvelo.com/auth/${userJWT}`,  (err, data) => {
+									if (err != null) {
+										console.error(err)
+									} else {
+										console.log(`////////////////////////////////////;;;;;;;;;;;;;;;;;;;;;;;;;;;; `)
+										console.log(data)
+										new p5(sketch)
+									}
+								})
+							}
+						})
+					} else {
+						let userJWT = window.localStorage.getItem('userJWT')
+						getJSON(`https://ayekilua.efectotripidesvelo.com/auth/${userJWT}`,  (err, data) => {
+								if (err != null) {
+									console.error(err)
+								} else {
+									console.log(`;;;;;;;;;;;;;;;;;;;;;;;;;;;; `)
+									console.log(data)
+									new p5(sketch)
+								}
+							})
+					}
+				}
+				script.src='https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js'
+				document.head.appendChild(script)
+			}
+		</script>
+	</head>
+
+	<body onload="noBack(); loadAfterOnload()" onpageshow="if (event.persisted) noBack();" onunload="">
+		<div unresolved id="initialDiv">
+			<div class="header">
+				<h1>Ayekilua - Meditative Axolotl Game by Efecto Tripidesvelo & Playa
+					Multimedia Games is loading, please wait a bit...</h1>
+			</div>
+			<p style="background-color: grey; color: white;">🙏 processing... getting elements ready for action!</p>
+		</div>
+		<noscript>
+			Please enable JavaScript to view this website.
+		</noscript>
+		<svg height="361.44495" width="192.72192" version="1.1" viewBox="0 0 200.72193 381.44496" id="ayekilua_svg">
+			<defs id="defs4">
+				<style id="styleSVG">
+					.ayekiluaSVGColor {fill: #f36;}
+					body {fill: #fff;}
+				</style>
+			</defs>
+			<title id="ayekiluaTitle">Ayekilua</title>
+			<path id="ayekiluaSVGPath" class="ayekiluaSVGColor"
+				d="m 157.13,189.17068 c 13.02162,-4.25788 35.38,0.37736 35.52323,16.93884 -2.69368,14.85707 -20.5296,15.6231 -31.01995,22.71957 -16.14218,11.64052 -5.54995,33.26293 -4.85824,49.30176 1.86077,23.12114 -15.69726,43.94754 -10.5446,67.28104 3.56622,8.37325 0.41726,23.23412 -9.41055,11.58613 -5.25331,-15.83675 -6.18183,-33.27641 -18.28826,-46.33392 -11.17981,-16.06915 -23.191867,-33.10933 -24.217663,-53.36193 -5.194231,-20.71536 -25.607472,-31.75304 -43.3084,-40.50874 -12.269794,-6.60749 -14.270109,-35.25778 4.763866,-30.12644 11.038656,8.52802 26.354518,-4.13829 16.699387,-15.70553 6.650739,-13.41379 -5.985235,-33.00239 -17.073531,-15.27902 -13.002162,10.16461 -30.643116,16.08126 -46.959159,11.40197 -10.3266369,-15.8034 19.898667,-31.86442 29.019032,-16.18264 16.750703,7.63792 31.780788,-6.68209 38.054265,-21.02126 3.370971,-8.99172 20.092623,-14.1882 15.327956,0.74465 -5.529948,14.37204 -16.222175,28.42034 -12.408604,44.64765 2.106741,8.82957 24.667971,30.70956 4.226564,29.11773 -11.057883,-5.93998 -32.934054,-30.71214 -39.354105,-7.23445 2.963264,20.20029 24.854906,28.47695 41.74267,34.39319 8.230764,6.98172 24.194622,1.3157 11.24083,-7.92672 -9.272761,-10.09977 -27.773202,-8.50639 -34.009826,-21.19298 17.880271,0.0303 30.756552,18.30797 45.922208,26.81195 17.61989,13.01756 -0.86581,29.65183 -0.0704,44.93986 -2.63369,7.8894 10.45348,30.03204 14.30543,16.87005 -0.91326,-6.25535 -4.41381,-18.74993 -0.30158,-5.34487 3.74918,17.47143 7.08861,35.4626 15.99216,51.20001 11.85191,-19.23274 2.13566,-41.87272 0.0346,-62.33543 -3.65966,-19.23824 -2.69172,-39.44369 -9.93703,-57.91879 2.4698,-13.3617 31.57689,-8.35705 30.27843,-10.91311 -17.86478,-2.70786 -24.58764,30.52943 -2.9795,22.9596 13.66634,-4.36148 28.36787,-12.7746 32.5178,-27.48107 -4.89167,-15.59844 -23.26072,-9.93155 -34.51131,-5.67069 -13.52796,8.46719 -28.17388,-5.59277 -16.48206,-17.94419 8.19289,-12.48087 -6.24461,-28.43625 0.6523,-42.39032 10.01798,-10.97469 -0.2908,-27.78552 -10.7894,-34.35546 -14.15681,-5.369493 -31.152973,-6.999144 -45.783934,-3.5976 -15.332028,7.72881 -12.677679,28.15262 -25.505146,38.20892 -13.4095,11.36278 4.194345,-13.09003 4.989489,-19.81943 3.55228,-10.66883 9.882006,-20.373223 13.31239,-30.890903 C 76.343552,67.141558 64.271081,48.458862 46.79032,44.342912 35.95249,35.240406 54.456176,31.461781 59.836561,38.486766 73.497465,38.913621 96.72912,24.283868 90.591425,10.172781 86.341646,2.010515 94.79274,-4.813746 97.623874,6.5248923 102.92421,21.901149 124.3196,38.596234 137.6279,21.753404 c 3.44784,-8.41674 26.88892,-25.1799648 23.05623,-6.579367 -2.7805,16.768906 17.86813,-7.3925843 20.72005,10.322871 13.0976,21.600364 -17.55856,24.214964 -25.29463,39.196184 -10.58478,10.251747 1.1621,29.862154 -11.26071,37.259508 -11.43408,2.27448 2.09436,23.52172 9.85622,27.94728 11.66044,6.8529 31.18787,-2.67905 34.42955,16.96921 5.89272,10.17851 -14.89844,17.29081 -6.55007,4.16904 -7.29032,-8.45981 -23.83487,-11.7826 -33.76726,-10.93395 -7.76879,12.99402 1.72419,30.36119 4.71342,44.04286 1.06096,1.76904 2.2882,3.43325 3.5993,5.02364 z" />
+		</svg>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Base64/1.1.0/base64.min.js" async defer></script>
+		
+		<!-- <script src="https://unpkg.com/rita" async defer></script> -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/rita/1.3.94/rita-full.min.js" async defer></script>
+		<script src="https://ayekilua.efectotripidesvelo.com/socket.io/socket.io.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/addons/p5.sound.min.js"></script>
+		<script src="js/ayekilua-sketch.js"></script>
+	</body>
+</html>
