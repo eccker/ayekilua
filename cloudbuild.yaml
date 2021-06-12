@@ -10,7 +10,7 @@
    args:
    - 'run'
    - 'deploy'
-   - 'ayekilua'
+   - 'ayekilua-service'
    - '--image'
    - 'gcr.io/$PROJECT_ID/ayekilua:$COMMIT_SHA'
    - '--region'
