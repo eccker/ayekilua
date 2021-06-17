@@ -495,3 +495,4 @@ MigrationBackup/
 # End of https://www.toptal.com/developers/gitignore/api/vs
 
 .vscode/
+.vscode/launch.json
