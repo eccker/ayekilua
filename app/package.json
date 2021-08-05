@@ -5,7 +5,7 @@
 	"main": "server.js",
 	"scripts": {
 		"build": "cd webinstrument && polymer build && cd ..",
-		"start": "node server.js",
+		"start": "node server.js mode=production",
 		"dev": "nodemon server.js"
 	},
 	"author": "cck1",

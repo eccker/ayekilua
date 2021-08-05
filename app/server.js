@@ -1,3 +1,46 @@
+// ask for parameters from the cli
+let arguments = []
+let badArg = false
+
+// Initialize variables to default values
+arguments[0] = `dev` // dev, production
+
+// retrieve and process command line argumets as key=value tokens
+let argumentsRAW = process.argv.slice(2)
+argumentsRAW.forEach(element => {
+	let [key, value] = element.split(`=`)
+	switch (key) {
+		case "mode":
+			if (value === `dev` || value === `production`) {
+				arguments[0] = value
+			} else {
+				console.log(`Mode ${value} is not recognized, only 'dev' or 'production' strings types allow`)
+				badArg = true
+			}
+
+			break
+
+		default:
+			console.log(`Argument ${key} is not recognized`)
+			badArg = true
+			break
+	}
+})
+
+// Exit program if argumet is not recognized
+if (badArg) {
+	console.log(`Exit....`)
+	return
+}
+
+let serverPath = ``
+const runMode = arguments[0]
+if (runMode === `dev`) {
+	serverPath = '/webinstrument/'
+} else if (runMode === `production`) {
+	serverPath = '/webinstrument/build/es6-bundled/'
+}
+
 // -------- cloud infrastructure, setting and configurations
 require('console-stamp')(console, '[HH:MM:ss.l]')
 let app = require('express')()
@@ -24,11 +67,17 @@ let secret1 = makeSecret(32)
 let secret2 = makeSecret(32)
 
 app.use(cors());
-app.use(compression({ level: 9 }))
+app.use(compression({
+	level: 9
+}))
 // store session state in browser cookie
-app.use(cookieSession({ keys: [`${secret1}`, `${secret2}`] }))
+app.use(cookieSession({
+	keys: [`${secret1}`, `${secret2}`]
+}))
 // parse urlencoded request bodies into req.body
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({
+	extended: false
+}))
 
 app.get('/privacy', (req, res) => {
 	console.log(`privacy requested`)
@@ -45,24 +94,26 @@ app.get('/privacy', (req, res) => {
 		decoded = jsonwebtoken.verify(req.params.tokenStr, 'zZHxtFcGrlychfSLKzv1Kg80uaK4zAM8')
 	} catch (err) {
 		console.error(`{"error":"unauthorized access or error token request"}`)
-		res.send({"error":"unauthorized access or error request"})
+		res.send({
+			"error": "unauthorized access or error request"
+		})
 		return null
 	}
 
-	const uname=decoded.credentials.username
-	const hpssd=decoded.credentials.hashedpassword
+	const uname = decoded.credentials.username
+	const hpssd = decoded.credentials.hashedpassword
 	const hashid = `${makeSecret(32)}_${decoded.user.id}`
 	const hashname = `${makeSecret(32)}_${decoded.user.name}`
 	const hashnounce = `${makeSecret(32)}_${decoded.user.nounce}`
 
 	let oPayload = {
-			"user": {
-				"id": hashid ,
-				"name": hashname,
-				"nounce": hashnounce,
+		"user": {
+			"id": hashid,
+			"name": hashname,
+			"nounce": hashnounce,
 		}
 	}
-	
+
 	//TODO check if user exists in DB, if not generate user in DB
 	let sPayload = JSON.stringify(oPayload, null, 4)
 	let token = jsonwebtoken.sign(sPayload, 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
@@ -75,61 +126,62 @@ app.get('/privacy', (req, res) => {
 		decoded = jsonwebtoken.verify(req.params.authTokenStr, 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
 	} catch (err) {
 		console.error(`{"error":"unauthorized access or error auth request"}`)
-		res.send({"error":"unauthorized access or error request"})
+		res.send({
+			"error": "unauthorized access or error request"
+		})
 		return null;
 	}
 	res.send(decoded)
 })
 
 // -------- RUN SERVER
-const server = app.use(serveStatic(__dirname + '/webinstrument/build/es6-bundled/')).listen(port, () => {
-// const server = app.use(serveStatic(__dirname + '/webinstrument/')).listen(port, () => {
-	console.log(`'Ayekilua' esta corriendo por el puerto ${port}`)
+const server = app.use(serveStatic(__dirname + serverPath)).listen(port, () => {
+	console.log(`'Ayekilua' esta corriendo por el puerto ${port} en modo ${arguments[0]}`)
 })
 
 // -------- Cloud App, business logic 
 let io = require('socket.io')(server, {
-	transports: ['websocket'], allowRequest:
-		(handshake, callback) => {
-			var cookie, token, authPair, parts;
-			// check for headers
-			if (handshake.headers.cookie &&
-				handshake.headers.cookie.split('=')[0] == 'ayekiluaapp') {
-				// found request cookie, parse it
-				cookie = handshake.headers.cookie
-				token = cookie.split(/=(.+)/)[1] || ''
-				authPair = new Buffer(token, 'base64').toString()
-				parts = authPair.split(/:/)
-				if (parts.length >= 1) {
-					for (let index = 0; index < parts.length; index++) {
-						let decoded
-						try {
-							decoded = jsonwebtoken.verify(parts[index], 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
-						} catch (err) {
-							return null;
-						}
+	transports: ['websocket'],
+	allowRequest: (handshake, callback) => {
+		var cookie, token, authPair, parts;
+		// check for headers
+		if (handshake.headers.cookie &&
+			handshake.headers.cookie.split('=')[0] == 'ayekiluaapp') {
+			// found request cookie, parse it
+			cookie = handshake.headers.cookie
+			token = cookie.split(/=(.+)/)[1] || ''
+			authPair = Buffer.from(token, 'base64').toString()
+			// authPair = new Buffer(token, 'base64').toString()
+			parts = authPair.split(/:/)
+			if (parts.length >= 1) {
+				for (let index = 0; index < parts.length; index++) {
+					let decoded
+					try {
+						decoded = jsonwebtoken.verify(parts[index], 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
+					} catch (err) {
+						return null;
 					}
-					callback(null, true);
-				} else {
-					console.log(`Condition parts.length<1 happened, parts is:${parts}`)
-					// not what we were expecting
-					callback(null, false)
 				}
-			}
-			else {
-				// auth failed
+				callback(null, true);
+			} else {
+				console.log(`Condition parts.length<1 happened, parts is:${parts}`)
+				// not what we were expecting
 				callback(null, false)
 			}
+		} else {
+			// auth failed
+			callback(null, false)
 		}
+	}
 });
 let allClients = []
 io.on('connection', (socket) => {
 	console.log('Un cliente se ha conectado con id: ', socket.id)
 	allClients.push(socket)
-	socket.on(`disconnect`, ()  => {
-	   console.log(`Got disconnect!`)
-	   let i = allClients.indexOf(socket)
-	   allClients.splice(i, 1)
+	socket.on(`disconnect`, () => {
+		console.log(`Got disconnected from ${socket.id}`)
+		let i = allClients.indexOf(socket)
+		allClients.splice(i, 1)
 	})
 	socket.on(`noteOn`, (data) => {
 		console.log(`El cliente ${socket.id} envio un "noteOn" con data: ${data} from socker.id: ${socket.id}`)
@@ -142,7 +194,7 @@ io.on('connection', (socket) => {
 		let decoded2
 		let id
 		let name
-		let nounce 
+		let nounce
 		try {
 			decoded = jsonwebtoken.verify(uJWT, 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
 			id = decoded.user.id
@@ -162,7 +214,7 @@ io.on('connection', (socket) => {
 		// console.log(`ID del cliente es: ${id} `)
 		io.emit(`color`, decoded2.user.color)
 		io.emit(`position`, [decoded2.user.mouseX, decoded2.user.mouseY])
-		
-		io.to(socket.id).emit(`habitat`, `Good job user ID: `+id)
+
+		io.to(socket.id).emit(`habitat`, `Good job user ID: ` + id)
 	})
 })
