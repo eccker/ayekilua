@@ -7,8 +7,6 @@ ENV HOST 0.0.0.0
 
 COPY ./app/package*.json ./
 
-RUN npm install polymer-cli@next
-
 RUN npm install --only=production
 
 COPY ./app/. .
