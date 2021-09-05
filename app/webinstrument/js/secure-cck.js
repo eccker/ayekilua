@@ -212,6 +212,8 @@ let loadAfterOnload = () => {
                 })
         }
     }
-    script.src='https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js'
+    // script.src='https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js'
+    script.src= '/js/jsrsasign-latest-all-min.js'
+    
     document.head.appendChild(script)
 }
