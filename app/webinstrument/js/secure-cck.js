@@ -155,9 +155,8 @@ window.history.forward()
 let noBack = () => { window.history.forward() }
 const cookieNameApp = `ayekiluaapp`
 
-let loadAfterOnload = () => {
-    let userCookie = getCookie(cookieNameApp)
-    console.log(userCookie)
+let loadAfterOnload = async () => {
+    let userCookie = await getCookie(cookieNameApp)
     userCookie === null?uJWT = 0:uJWT = 1
     // Generate a RHUID and store it on localstorage
     let script = document.createElement('script')
@@ -171,20 +170,19 @@ let loadAfterOnload = () => {
                         "nounce": `${makeSecret(32)}`,
                     },
                     "credentials":{
-                        "username":`usertest`,
-                        "hashedpassword":`${sha256("hashedpassword4usertest")}`
+                        "username":`${makeSecret(32)}`,
+                        "hashedpassword":`${sha256(makeSecret(32))}`
                     }
             }
             let sHeader = JSON.stringify(oHeader)
             let sPayload = JSON.stringify(oPayload)
             // TODO this must be requested as an API request
-            let preuserJWT = KJUR.jws.JWS.sign("HS256", sHeader, sPayload, "zZHxtFcGrlychfSLKzv1Kg80uaK4zAM8")
-            getJSON(`/token/${preuserJWT}`,  (err, data) => {
+            let randomKey = makeSecret(32)
+            let preuserJWT = KJUR.jws.JWS.sign("HS256", sHeader, sPayload, randomKey)
+            getJSON(`/token/${preuserJWT}/${randomKey}`,  (err, data) => {
                 if (err != null) {
                     console.error(err)
                 } else {
-                    console.log(`%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% `)
-                    console.log(data)
                     window.localStorage.setItem('userJWT', data)
                     writeCookie(cookieNameApp, data, 1)
                     let userJWT = window.localStorage.getItem('userJWT')
@@ -192,8 +190,6 @@ let loadAfterOnload = () => {
                         if (err != null) {
                             console.error(err)
                         } else {
-                            console.log(`////////////////////////////////////;;;;;;;;;;;;;;;;;;;;;;;;;;;; `)
-                            console.log(data)
                             new p5(sketch)
                         }
                     })
@@ -205,15 +201,11 @@ let loadAfterOnload = () => {
                     if (err != null) {
                         console.error(err)
                     } else {
-                        console.log(`;;;;;;;;;;;;;;;;;;;;;;;;;;;; `)
-                        console.log(data)
                         new p5(sketch)
                     }
                 })
         }
     }
-    // script.src='https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js'
     script.src= '/js/jsrsasign-latest-all-min.js'
-    
     document.head.appendChild(script)
 }

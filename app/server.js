@@ -43,6 +43,7 @@ if (runMode === `dev`) {
 
 // -------- cloud infrastructure, setting and configurations
 require('console-stamp')(console, '[HH:MM:ss.l]')
+require('dotenv').config();
 let app = require('express')()
 let serveStatic = require('serve-static')
 let compression = require('compression')
@@ -80,18 +81,16 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.get('/privacy', (req, res) => {
-	console.log(`privacy requested`)
 	const privacy = require('./legal.js').privacy;
 	res.send(privacy);
 }).get('/terms', (req, res) => {
-	console.log(`terms requested`)
 	const terms = require('./legal.js').terms;
 	res.send(terms);
-}).get('/token/:tokenStr', (req, res) => {
+}).get('/token/:tokenStr/:randomKey', (req, res) => {
 	console.log(`token requested`)
 	let decoded
 	try {
-		decoded = jsonwebtoken.verify(req.params.tokenStr, 'zZHxtFcGrlychfSLKzv1Kg80uaK4zAM8')
+		decoded = jsonwebtoken.verify(req.params.tokenStr, req.params.randomKey )
 	} catch (err) {
 		console.error(`{"error":"unauthorized access or error token request"}`)
 		res.send({
@@ -116,14 +115,14 @@ app.get('/privacy', (req, res) => {
 
 	//TODO check if user exists in DB, if not generate user in DB
 	let sPayload = JSON.stringify(oPayload, null, 4)
-	let token = jsonwebtoken.sign(sPayload, 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
+	let token = jsonwebtoken.sign(sPayload, process.env.SERVER_KEY)
 
 	// TODO send token by email when is registering
 	res.send(token)
 }).get('/auth/:authTokenStr', (req, res) => {
 	let decoded
 	try {
-		decoded = jsonwebtoken.verify(req.params.authTokenStr, 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
+		decoded = jsonwebtoken.verify(req.params.authTokenStr, process.env.SERVER_KEY)
 	} catch (err) {
 		console.error(`{"error":"unauthorized access or error auth request"}`)
 		res.send({
@@ -151,13 +150,13 @@ let io = require('socket.io')(server, {
 			cookie = handshake.headers.cookie
 			token = cookie.split(/=(.+)/)[1] || ''
 			authPair = Buffer.from(token, 'base64').toString()
-			// authPair = new Buffer(token, 'base64').toString()
 			parts = authPair.split(/:/)
 			if (parts.length >= 1) {
 				for (let index = 0; index < parts.length; index++) {
 					let decoded
 					try {
-						decoded = jsonwebtoken.verify(parts[index], 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
+						decoded = jsonwebtoken.verify(parts[index], process.env.SERVER_KEY)
+						console.dir(decoded)
 					} catch (err) {
 						return null;
 					}
@@ -196,7 +195,7 @@ io.on('connection', (socket) => {
 		let name
 		let nounce
 		try {
-			decoded = jsonwebtoken.verify(uJWT, 'OnUIZy0GMvZNzjnrYdp2ltRbl3irQDj1')
+			decoded = jsonwebtoken.verify(uJWT, process.env.SERVER_KEY)
 			id = decoded.user.id
 			name = decoded.user.name
 			nounce = decoded.user.nounce
