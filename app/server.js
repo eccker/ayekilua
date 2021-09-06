@@ -17,9 +17,7 @@ argumentsRAW.forEach(element => {
 				console.log(`Mode ${value} is not recognized, only 'dev' or 'production' strings types allow`)
 				badArg = true
 			}
-
 			break
-
 		default:
 			console.log(`Argument ${key} is not recognized`)
 			badArg = true
@@ -199,7 +197,7 @@ io.on('connection', (socket) => {
 			id = decoded.user.id
 			name = decoded.user.name
 			nounce = decoded.user.nounce
-			//look for this in DB
+			//TODO look for this in DB
 		} catch (err) {
 			console.error(`{"error":"unauthorized access or error auth request"}`)
 			return null;
@@ -209,11 +207,9 @@ io.on('connection', (socket) => {
 		} catch (err) {
 			return null;
 		}
-		// console.log(`El cliente ${socket.id} envio un "LED" con datos decodificados: `, decoded2)
-		// console.log(`ID del cliente es: ${id} `)
+		
 		io.emit(`color`, decoded2.user.color)
 		io.emit(`position`, [decoded2.user.mouseX, decoded2.user.mouseY])
-
 		io.to(socket.id).emit(`habitat`, `Good job user ID: ` + id)
 	})
 })
