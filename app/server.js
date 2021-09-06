@@ -96,7 +96,6 @@ app.get('/privacy', (req, res) => {
 		})
 		return null
 	}
-
 	const uname = decoded.credentials.username
 	const hpssd = decoded.credentials.hashedpassword
 	const hashid = `${makeSecret(32)}_${decoded.user.id}`
@@ -110,11 +109,9 @@ app.get('/privacy', (req, res) => {
 			"nounce": hashnounce,
 		}
 	}
-
 	//TODO check if user exists in DB, if not generate user in DB
 	let sPayload = JSON.stringify(oPayload, null, 4)
 	let token = jsonwebtoken.sign(sPayload, process.env.SERVER_KEY)
-
 	// TODO send token by email when is registering
 	res.send(token)
 }).get('/auth/:authTokenStr', (req, res) => {
@@ -122,7 +119,7 @@ app.get('/privacy', (req, res) => {
 	try {
 		decoded = jsonwebtoken.verify(req.params.authTokenStr, process.env.SERVER_KEY)
 	} catch (err) {
-		console.error(`{"error":"unauthorized access or error auth request"}`)
+		console.error(`{"errorAUTH":"unauthorized access or error auth request"}`)
 		res.send({
 			"error": "unauthorized access or error request"
 		})
@@ -154,7 +151,6 @@ let io = require('socket.io')(server, {
 					let decoded
 					try {
 						decoded = jsonwebtoken.verify(parts[index], process.env.SERVER_KEY)
-						console.dir(decoded)
 					} catch (err) {
 						return null;
 					}

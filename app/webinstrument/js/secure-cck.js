@@ -110,7 +110,7 @@ let makeSecret = (length) => {
 let getJSON = (url, callback) => {
     var xhr = new XMLHttpRequest()
     xhr.open('GET', url, true)
-    xhr.responseType = 'html'
+    xhr.responseType = 'text'
     xhr.onload = () => {
         var status = xhr.status
         if (status == 200) {
