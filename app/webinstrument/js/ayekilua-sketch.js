@@ -221,7 +221,7 @@ let sketch = (p) => {
 							frase = frase + ` ` + words[i]
 						}
 					}
-					p.textSize(18)
+					p.textSize(22)
 					p.fill(tempcol.substring(0, 7))
 					positionActual = (Math.floor(Math.random() * p.windowWidth) + 1) + (Math.floor(Math.random() * p.windowHeight) + 1)
 					ayekiluaElement.style.display = "flow-root"

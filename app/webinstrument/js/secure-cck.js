@@ -154,6 +154,7 @@ let uJWT
 window.history.forward()
 let noBack = () => { window.history.forward() }
 const cookieNameApp = `ayekiluaapp`
+let hashedpassword
 
 let loadAfterOnload = async () => {
     let userCookie = await getCookie(cookieNameApp)
@@ -170,10 +171,12 @@ let loadAfterOnload = async () => {
                         "nounce": `${makeSecret(32)}`,
                     },
                     "credentials":{
-                        "username":`${makeSecret(32)}`,
-                        "hashedpassword":`${sha256(makeSecret(32))}`
+                        "username":`${makeSecret(32)}`, // TODO obtain this from user
+                        "hashedpassword":`${sha256(makeSecret(32))}` // TODO obtain this from user
                     }
             }
+            hashedpassword = oPayload.credentials.hashedpassword
+            window.localStorage.setItem('hashedpassword', hashedpassword)
             let sHeader = JSON.stringify(oHeader)
             let sPayload = JSON.stringify(oPayload)
             // TODO this must be requested as an API request
@@ -186,10 +189,11 @@ let loadAfterOnload = async () => {
                     window.localStorage.setItem('userJWT', data)
                     writeCookie(cookieNameApp, data, 1)
                     let userJWT = window.localStorage.getItem('userJWT')
-                    getJSON(`/auth/${userJWT}`,  (err, data) => {
+                    getJSON(`/auth/${userJWT}/${hashedpassword}`,  (err, data) => {
                         if (err != null) {
                             console.error(err)
                         } else {
+                            console.log(data)
                             new p5(sketch)
                         }
                     })
@@ -197,10 +201,12 @@ let loadAfterOnload = async () => {
             })
         } else {
             let userJWT = window.localStorage.getItem('userJWT')
-            getJSON(`/auth/${userJWT}`,  (err, data) => {
+            hashedpassword = window.localStorage.getItem('hashedpassword')
+            getJSON(`/auth/${userJWT}/${hashedpassword}`,  (err, data) => {
                     if (err != null) {
                         console.error(err)
                     } else {
+                        console.log(data)
                         new p5(sketch)
                     }
                 })

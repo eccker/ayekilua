@@ -96,8 +96,8 @@ app.get('/privacy', (req, res) => {
 		})
 		return null
 	}
-	const uname = decoded.credentials.username
-	const hpssd = decoded.credentials.hashedpassword
+	const uname = `${makeSecret(32)}_${decoded.credentials.username}`
+	const hpssd = `${makeSecret(32)}_${decoded.credentials.hashedpassword}`
 	const hashid = `${makeSecret(32)}_${decoded.user.id}`
 	const hashname = `${makeSecret(32)}_${decoded.user.name}`
 	const hashnounce = `${makeSecret(32)}_${decoded.user.nounce}`
@@ -107,25 +107,44 @@ app.get('/privacy', (req, res) => {
 			"id": hashid,
 			"name": hashname,
 			"nounce": hashnounce,
+		},
+		"credentials":{
+			"username": uname, // TODO obtain this from user
+			"hashedpassword": hpssd // TODO obtain this from user
 		}
 	}
-	//TODO check if user exists in DB, if not generate user in DB
+
 	let sPayload = JSON.stringify(oPayload, null, 4)
 	let token = jsonwebtoken.sign(sPayload, process.env.SERVER_KEY)
 	// TODO send token by email when is registering
 	res.send(token)
-}).get('/auth/:authTokenStr', (req, res) => {
+}).get('/auth/:authTokenStr/:hashedPassword', (req, res) => {
 	let decoded
 	try {
 		decoded = jsonwebtoken.verify(req.params.authTokenStr, process.env.SERVER_KEY)
+		// TODO create a user in the database if is the first login 
 	} catch (err) {
 		console.error(`{"errorAUTH":"unauthorized access or error auth request"}`)
 		res.send({
-			"error": "unauthorized access or error request"
+			"error": "unauthorized access or error token request"
 		})
 		return null;
 	}
-	res.send(decoded)
+	// TODO 
+	if(decoded.credentials.hashedpassword.length > 64) {
+		let retrievedHP = `${decoded.credentials.hashedpassword}`.substring(33) // retrieved from JWT token
+		let userHP = req.params.hashedPassword
+		if(userHP === retrievedHP) { 
+			res.send(decoded.user.id)
+		} else {
+			res.send({
+				"error": "unauthorized access or error hashed password request"
+			})
+		}
+	} else {
+		res.send({
+			"error": "unauthorized access or error request auth"
+	})}
 })
 
 // -------- RUN SERVER
@@ -152,6 +171,7 @@ let io = require('socket.io')(server, {
 					try {
 						decoded = jsonwebtoken.verify(parts[index], process.env.SERVER_KEY)
 					} catch (err) {
+						console.log(`Error happens: ${err}`)
 						return null;
 					}
 				}
