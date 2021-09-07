@@ -4,6 +4,7 @@ WORKDIR /usr/src/app
 
 ENV PORT 9001
 ENV HOST 0.0.0.0
+ENV SERVER_KEY $SERVER_KEY
 
 COPY ./app/package*.json ./
 

@@ -1,7 +1,7 @@
  steps:
  # build the container image
  - name: 'gcr.io/cloud-builders/docker'
-   args: ['build', '--build-arg','SERVER_KEY="${_SERVER_KEY}"', '-t', 'gcr.io/$PROJECT_ID/ayekilua:$COMMIT_SHA', '.']
+   args: ['build', '-t', 'gcr.io/$PROJECT_ID/ayekilua:$COMMIT_SHA', '.']
  # push the container image to Container Registry
  - name: 'gcr.io/cloud-builders/docker'
    args: ['push', 'gcr.io/$PROJECT_ID/ayekilua:$COMMIT_SHA']
@@ -17,5 +17,7 @@
    - 'us-east1'
    - '--platform'
    - 'managed'
+   - '--set-env-vars'
+   - 'SERVER_KEY="${_SERVER_KEY}"'
  images:
  - 'gcr.io/$PROJECT_ID/ayekilua:$COMMIT_SHA'
