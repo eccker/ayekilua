@@ -8,6 +8,7 @@ let sketch = (p) => {
 	let frase = ` `
 	let started = true
 	let canvasApp
+	let nft = `ayekilua_` 
 
 	let ayekiluaElement
 	let ayekiluaPath
@@ -241,9 +242,15 @@ let sketch = (p) => {
 	}
 
 	p.keyReleased = () => {
-		if (p.key === ' ') {
-			trace = !trace
-			p.background(0)
+		if (p.key === 'T') {
+			html2canvas(document.body)
+				.then(function(canvas) {
+					const link = document.createElement('a')
+					link.download = `${nft}${tempcol.substring(1)}_${positionActual}.png`
+					link.href = canvas.toDataURL()
+					link.click();
+					link.delete;
+				})
 		}
 	}
 
