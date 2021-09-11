@@ -1,3 +1,5 @@
+let default_SERVER_KEY = process.env.SERVER_KEY || 'default_SERVER_KEY';
+console.log(default_SERVER_KEY + ': ' + process.env.SERVER_KEY);
 // ask for parameters from the cli
 let arguments = []
 let badArg = false
@@ -115,13 +117,13 @@ app.get('/privacy', (req, res) => {
 	}
 
 	let sPayload = JSON.stringify(oPayload, null, 4)
-	let token = jsonwebtoken.sign(sPayload, process.env.SERVER_KEY)
+	let token = jsonwebtoken.sign(sPayload, default_SERVER_KEY)
 	// TODO send token by email when is registering
 	res.send(token)
 }).get('/auth/:authTokenStr/:hashedPassword', (req, res) => {
 	let decoded
 	try {
-		decoded = jsonwebtoken.verify(req.params.authTokenStr, process.env.SERVER_KEY)
+		decoded = jsonwebtoken.verify(req.params.authTokenStr, default_SERVER_KEY)
 		// TODO create a user in the database if is the first login 
 	} catch (err) {
 		console.error(`{"errorAUTH":"unauthorized access or error auth request"}`)
@@ -169,7 +171,7 @@ let io = require('socket.io')(server, {
 				for (let index = 0; index < parts.length; index++) {
 					let decoded
 					try {
-						decoded = jsonwebtoken.verify(parts[index], process.env.SERVER_KEY)
+						decoded = jsonwebtoken.verify(parts[index], default_SERVER_KEY)
 					} catch (err) {
 						console.log(`Error happens: ${err}`)
 						return null;
@@ -209,7 +211,7 @@ io.on('connection', (socket) => {
 		let name
 		let nounce
 		try {
-			decoded = jsonwebtoken.verify(uJWT, process.env.SERVER_KEY)
+			decoded = jsonwebtoken.verify(uJWT, default_SERVER_KEY)
 			id = decoded.user.id
 			name = decoded.user.name
 			nounce = decoded.user.nounce

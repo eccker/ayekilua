@@ -1,4 +1,68 @@
 let sketch = (p) => {
+	let Greeter
+	let AYEKIToken
+	let greeting = `default greeting` 
+	const greeterAddress = "0xF6bCB007b7E2840C6A999B75E00B5bF04Ff4c31D"
+	const tokenAddress = "0x9c73f61a17Df027112482fe8CCc481D40D1d880E"
+
+	
+	let userAccount
+	let amount
+
+	let requestAccount = async () => {
+		await window.ethereum.request({ method: 'eth_requestAccounts' });
+	}
+	
+	let getBalance = async () => {
+		if (typeof window.ethereum !== 'undefined') {
+		  const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
+		  const provider = new ethers.providers.Web3Provider(window.ethereum);
+		  const contract = new ethers.Contract(tokenAddress, AYEKIToken.abi, provider)
+		  const balance = await contract.balanceOf(account);
+		  console.log("Balance: ", balance.toString());
+		}
+	}
+
+	let	sendCoins = async (userAccount, amount) => {
+		if (typeof window.ethereum !== 'undefined') {
+		  await requestAccount()
+		  const provider = new ethers.providers.Web3Provider(window.ethereum);
+		  const signer = provider.getSigner();
+		  const contract = new ethers.Contract(tokenAddress, AYEKIToken.abi, signer);
+		  const transation = await contract.transfer(userAccount, amount);
+		  await transation.wait();
+		  console.log(`${amount} Coins successfully sent to ${userAccount}`);
+		}
+	  }
+	
+	
+	let fetchGreeting = async () => {
+		if (typeof window.ethereum !== 'undefined') {
+		  const provider = new ethers.providers.Web3Provider(window.ethereum)
+		  const contract = new ethers.Contract(greeterAddress, Greeter.abi, provider)
+		  try {
+			const data = await contract.greet()
+			console.log('data: ', data)
+		  } catch (err) {
+			console.log("Error: ", err)
+		  }
+		}    
+	  }
+	
+	  // call the smart contract, send an update
+	let setGreeting = async () =>{
+		if (!frase) return
+		if (typeof window.ethereum !== 'undefined') {
+			await requestAccount()
+			const provider = new ethers.providers.Web3Provider(window.ethereum);
+			const signer = provider.getSigner()
+			const contract = new ethers.Contract(greeterAddress, Greeter.abi, signer)
+			const transaction = await contract.setGreeting(frase)
+			await transaction.wait()
+			fetchGreeting()
+		}
+	  }
+	
 	let trace = false // are we tracing?
 	let rg
 	let now = 0
@@ -19,7 +83,7 @@ let sketch = (p) => {
 	let xoff = 1.0
 	let pointArrays
 	let ayekiluaCommands
-	let positionActual =0
+	let positionActual =0.0
 	let elapsedTime
 	let tempcol = `#33ffccff` 
 	let someHeartBeatPeriod = 0
@@ -33,7 +97,7 @@ let sketch = (p) => {
 		return result
 	}
 
-	let modifyAyekilua = (interactive) => {
+	let modifyAyekilua = (addedDistortion) => {
 		let newPointArrays = []
 		
 		for (let jj = 0; jj < pointArrays.length; jj++) {
@@ -42,11 +106,12 @@ let sketch = (p) => {
 				newPointArrays[jj][kk] = []
 				for (let ll = 0; ll < pointArrays[jj][kk].length; ll++) {
 					xoff = xoff - 0.0618
-					let n = p.noise(xoff) * 0.618382 * p.map(interactive, 0, p.width + p.height, -64,64)
-					let m = 0.618382 * p.map(p.sin(xoff), -1, 1, -64,64)
+					let n = p.noise(xoff) * 0.618382 * p.map(addedDistortion, 0, 2, -64,64)
+					let m = p.noise(xoff) * 0.618382 * p.map(p.sin(addedDistortion), 0, 2, -64,64)
+					// let m = 0.01618382 * 0.618382 * p.map(p.sin(xoff), -1, 1, -64,64)
 					const thisPoint = parseFloat(pointArrays[jj][kk][ll])
 					if (!isNaN(thisPoint)) {
-						newPointArrays[jj][kk][ll] = (thisPoint + n) + p.sin(p.noise(xoff))
+						newPointArrays[jj][kk][ll] = (thisPoint + n) + m
 					}
 				}
 			}
@@ -81,6 +146,20 @@ let sketch = (p) => {
 			glBandera = true
 		}
 		rg.loadFrom(`./../assets/ayekilua.json`, gramaticaLista)
+		fetch("/assets/Greeter.json")
+			.then(response => {
+   				return response.json()
+			})
+			.then(jsondata => {
+				Greeter = jsondata;
+			})
+		fetch("/assets/AYEKIToken.json")
+			.then(response => {
+   				return response.json()
+			})
+			.then(jsondata => {
+				AYEKIToken = jsondata;
+			})
 	}
 
 	p.setup = () => {
@@ -123,7 +202,7 @@ let sketch = (p) => {
 				}).reduce((a, b) => {
 					return a + b
 				  })
-				positionActual=p.map(parseFloat(sum),0, 2, 0, p.width + p.height)
+				positionActual=parseFloat(sum)
 				modifyAyekilua(positionActual)
 				flag2 = false
 			}
@@ -224,7 +303,7 @@ let sketch = (p) => {
 					}
 					p.textSize(22)
 					p.fill(tempcol.substring(0, 7))
-					positionActual = (Math.floor(Math.random() * p.windowWidth) + 1) + (Math.floor(Math.random() * p.windowHeight) + 1)
+					positionActual =( (Math.floor(Math.random() * p.windowWidth) + 1) + (Math.floor(Math.random() * p.windowHeight) + 1) )/(p.windowWidth + p.windowHeight)
 					ayekiluaElement.style.display = "flow-root"
 					tempcol = "#" + makeHexString(8)
 					ayekiluaElement.style.fill = tempcol
@@ -251,7 +330,19 @@ let sketch = (p) => {
 					link.click();
 					link.delete;
 				})
+		} 
+		if (p.key === 's') {
+			greeting = `new greting.....${makeSecret(8)}`
+			setGreeting()
 		}
+		if (p.key === 'b') {
+			greeting = `new greting.....${makeSecret(8)}`
+			getBalance()
+		}
+		if (p.key === 'X') {
+			sendCoins('0x8bBd610542c67B355CC0152511ac2b3560F7d13c', 1618000000);
+		}
+		
 	}
 
 	p.mousePressed = () => {
@@ -274,5 +365,6 @@ let sketch = (p) => {
 		let sPayload = JSON.stringify(oPayload)
 		let signedCommands = KJUR.jws.JWS.sign("HS256", sHeader, sPayload, currentJWT)
 		socket.emit(`LED`, signedCommands+`;`+currentJWT)
+		fetchGreeting()
 	}
 }
