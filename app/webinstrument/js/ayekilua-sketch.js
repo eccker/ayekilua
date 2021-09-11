@@ -105,13 +105,12 @@ let sketch = (p) => {
 			for (let kk = 0; kk < pointArrays[jj].length; kk++) {
 				newPointArrays[jj][kk] = []
 				for (let ll = 0; ll < pointArrays[jj][kk].length; ll++) {
-					xoff = xoff - 0.0618
-					let n = p.noise(xoff) * 0.618382 * p.map(addedDistortion, 0, 2, -64,64)
-					let m = p.noise(xoff) * 0.618382 * p.map(p.sin(addedDistortion), 0, 2, -64,64)
-					// let m = 0.01618382 * 0.618382 * p.map(p.sin(xoff), -1, 1, -64,64)
+					xoff = xoff - 0.618
+					let n = p.noise(xoff) * 0.618382 * p.map(addedDistortion, 0, 2, -128,128) 
+					// let n = p.noise(xoff) * addedDistortion
 					const thisPoint = parseFloat(pointArrays[jj][kk][ll])
 					if (!isNaN(thisPoint)) {
-						newPointArrays[jj][kk][ll] = (thisPoint + n) + m
+						newPointArrays[jj][kk][ll] = (thisPoint + n) 
 					}
 				}
 			}
@@ -236,10 +235,10 @@ let sketch = (p) => {
 			for (let kk = 0; kk < pointArrays[jj].length; kk++) {
 				newPointArrays[jj][kk] = []
 				for (let ll = 0; ll < pointArrays[jj][kk].length; ll++) {
-					xoff = xoff - 0.0618
-					let n = p.noise(xoff) * 1.1618382
 					const thisPoint = parseFloat(pointArrays[jj][kk][ll])
 					if (!isNaN(thisPoint)) {
+						xoff = xoff - 0.0618
+						let n = p.noise(xoff) * 1.1618382
 						newPointArrays[jj][kk][ll] = (thisPoint + n)
 					}
 				}
@@ -273,6 +272,7 @@ let sketch = (p) => {
 		p.resizeCanvas(p.windowWidth, p.windowHeight)
 		document.getElementById('ayekilua_svg').setAttribute('width', p.windowWidth)
 		document.getElementById('ayekilua_svg').setAttribute('height', p.windowHeight)
+		p.background(p.random(19,28), p.random(26,28), p.random(26,35), 255)	
 	}
 
 	p.draw = () => {
@@ -350,7 +350,7 @@ let sketch = (p) => {
 		ayekiluaElement.style.display = "flow-root"
 		tempcol = "#" + makeHexString(8)
 		ayekiluaElement.style.fill = tempcol
-		positionActual = p.mouseY + p.mouseX
+		positionActual = (p.mouseY + p.mouseX)/(p.width + p.height)
 		modifyAyekilua(positionActual)
 		let currentJWT = window.localStorage.getItem('userJWT')
 		let oHeader = { alg: 'HS256', typ: 'JWT' }
