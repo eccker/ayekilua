@@ -8,19 +8,16 @@ async function main() {
     deployer.address
   );
 
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, World!");
+  const Stamper = await hre.ethers.getContractFactory("Stamper");
+  const stamper = await Stamper.deploy("Ayekilua Meditative Axolotl Game");
 
-  // const Token = await hre.ethers.getContractFactory("Token");
-  // const token = await Token.deploy();
+  const Token = await hre.ethers.getContractFactory("Token");
+  const ayekitoken = await Token.deploy("Ayekilua Token", "AYEKI");
 
-  const AYEKIToken = await hre.ethers.getContractFactory("AYEKIToken");
-  const ayekitoken = await AYEKIToken.deploy("Ayekilua Token", "AYEKI");
-
-  await greeter.deployed();
+  await stamper.deployed();
   await ayekitoken.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  console.log("stamper deployed to:", stamper.address);
   console.log("ayekitoken deployed to:", ayekitoken.address);
 }
 

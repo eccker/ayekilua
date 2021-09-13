@@ -1,9 +1,9 @@
 let sketch = (p) => {
-	let Greeter
-	let AYEKIToken
+	let Stamper
+	let Token
 	let greeting = `default greeting` 
-	const greeterAddress = "0xF6bCB007b7E2840C6A999B75E00B5bF04Ff4c31D"
-	const tokenAddress = "0x9c73f61a17Df027112482fe8CCc481D40D1d880E"
+	const stamperAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+	const tokenAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
 
 	
 	let userAccount
@@ -17,7 +17,7 @@ let sketch = (p) => {
 		if (typeof window.ethereum !== 'undefined') {
 		  const [account] = await window.ethereum.request({ method: 'eth_requestAccounts' })
 		  const provider = new ethers.providers.Web3Provider(window.ethereum);
-		  const contract = new ethers.Contract(tokenAddress, AYEKIToken.abi, provider)
+		  const contract = new ethers.Contract(tokenAddress, Token.abi, provider)
 		  const balance = await contract.balanceOf(account);
 		  console.log("Balance: ", balance.toString());
 		}
@@ -28,7 +28,7 @@ let sketch = (p) => {
 		  await requestAccount()
 		  const provider = new ethers.providers.Web3Provider(window.ethereum);
 		  const signer = provider.getSigner();
-		  const contract = new ethers.Contract(tokenAddress, AYEKIToken.abi, signer);
+		  const contract = new ethers.Contract(tokenAddress, Token.abi, signer);
 		  const transation = await contract.transfer(userAccount, amount);
 		  await transation.wait();
 		  console.log(`${amount} Coins successfully sent to ${userAccount}`);
@@ -36,12 +36,12 @@ let sketch = (p) => {
 	  }
 	
 	
-	let fetchGreeting = async () => {
+	let fetchStamp = async () => {
 		if (typeof window.ethereum !== 'undefined') {
 		  const provider = new ethers.providers.Web3Provider(window.ethereum)
-		  const contract = new ethers.Contract(greeterAddress, Greeter.abi, provider)
+		  const contract = new ethers.Contract(stamperAddress, Stamper.abi, provider)
 		  try {
-			const data = await contract.greet()
+			const data = await contract.getStamp()
 			console.log('data: ', data)
 		  } catch (err) {
 			console.log("Error: ", err)
@@ -50,16 +50,16 @@ let sketch = (p) => {
 	  }
 	
 	  // call the smart contract, send an update
-	let setGreeting = async () =>{
+	let setStamp = async () =>{
 		if (!frase) return
 		if (typeof window.ethereum !== 'undefined') {
 			await requestAccount()
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
 			const signer = provider.getSigner()
-			const contract = new ethers.Contract(greeterAddress, Greeter.abi, signer)
-			const transaction = await contract.setGreeting(frase)
+			const contract = new ethers.Contract(stamperAddress, Stamper.abi, signer)
+			const transaction = await contract.setStamp(frase)
 			await transaction.wait()
-			fetchGreeting()
+			fetchStamp()
 		}
 	  }
 	
@@ -145,19 +145,19 @@ let sketch = (p) => {
 			glBandera = true
 		}
 		rg.loadFrom(`./../assets/ayekilua.json`, gramaticaLista)
-		fetch("/assets/Greeter.json")
+		fetch("/assets/Stamper.json")
 			.then(response => {
    				return response.json()
 			})
 			.then(jsondata => {
-				Greeter = jsondata;
+				Stamper = jsondata;
 			})
-		fetch("/assets/AYEKIToken.json")
+		fetch("/assets/Token.json")
 			.then(response => {
    				return response.json()
 			})
 			.then(jsondata => {
-				AYEKIToken = jsondata;
+				Token = jsondata;
 			})
 	}
 
@@ -332,15 +332,13 @@ let sketch = (p) => {
 				})
 		} 
 		if (p.key === 's') {
-			greeting = `new greting.....${makeSecret(8)}`
-			setGreeting()
+			setStamp()
 		}
 		if (p.key === 'b') {
-			greeting = `new greting.....${makeSecret(8)}`
 			getBalance()
 		}
 		if (p.key === 'X') {
-			sendCoins('0x8bBd610542c67B355CC0152511ac2b3560F7d13c', 1618000000);
+			sendCoins('0x8bBd610542c67B355CC0152511ac2b3560F7d13c', 10000000000);
 		}
 		
 	}
@@ -365,6 +363,6 @@ let sketch = (p) => {
 		let sPayload = JSON.stringify(oPayload)
 		let signedCommands = KJUR.jws.JWS.sign("HS256", sHeader, sPayload, currentJWT)
 		socket.emit(`LED`, signedCommands+`;`+currentJWT)
-		fetchGreeting()
+		fetchStamp()
 	}
 }
