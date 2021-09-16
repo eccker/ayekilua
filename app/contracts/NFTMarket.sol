@@ -1,9 +1,11 @@
-// SPDX-License-identifier: MIT
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ECR721/ECR721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+
+import "hardhat/console.sol";
 
 contract NFTMarket is ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -21,7 +23,7 @@ contract NFTMarket is ReentrancyGuard {
         uint itemId;
         address nftContract;
         uint256 tokenId;
-        address payable sellet;
+        address payable seller;
         address payable owner;
         uint256 price;
         bool sold;
@@ -58,7 +60,7 @@ contract NFTMarket is ReentrancyGuard {
             itemId,
             nftContract,
             tokenId,
-            payable(msn.sender),
+            payable(msg.sender),
             payable(address(0)), 
             price,
             false
@@ -81,16 +83,17 @@ contract NFTMarket is ReentrancyGuard {
         address nftContract, 
         uint256 itemId
     ) public payable nonReentrant {
-        uint price = itToMarketItem[itemId].price;
+        uint price = idToMarketItem[itemId].price;
         uint tokenId = idToMarketItem[itemId].tokenId;
         require(msg.value == price, "Please submit the asking price in order to complete the purchase.");
 
         idToMarketItem[itemId].seller.transfer(msg.value);
-        IERC721(nftContract).trnsferFrom(address(this), msg.sender, tokenId);
+        IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
         idToMarketItem[itemId].owner = payable(msg.sender);
-        itToMarketItem[itemId].sold = true;
+        idToMarketItem[itemId].sold = true;
         _itemsSold.increment();
-        payable(owner).trasnfer(listingPrice);
+        payable(owner).transfer(listingPrice);
+        
     }
 
     function fetchMarketItems() public view returns (MarketItem[] memory) {
