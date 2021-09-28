@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -13,7 +13,8 @@ contract NFTMarket is ReentrancyGuard {
     Counters.Counter private _itemsSold;
 
     address payable owner;
-    uint256 listingPrice = 0.025 ether;  // this will have different monetary values depending on the network launched (ethereum or polygon)
+    // this will have different monetary values depending on the network launched (ethereum, polygon, etc)
+    uint256 listingPrice = 0.025 ether;  
 
     constructor (){
         owner = payable(msg.sender);

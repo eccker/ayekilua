@@ -13,11 +13,12 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
+const _ACCOUNT_KEY = process.env.ACCOUNT_KEY || '1234567890987654321'
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  solidity: "0.8.7",
+  solidity: "0.8.4",
   paths: {
     artifacts: './src/artifacts',
   },
@@ -27,7 +28,7 @@ module.exports = {
     },
     ropsten:{
       url:"https://ropsten.infura.io/v3/7fc8b1e024424a7da9f920edac1b416e", 
-      accounts:[`0x${process.env.ACCOUNT_KEY}`]
+      accounts:[`0x${_ACCOUNT_KEY}`]
     }
   }
 };
