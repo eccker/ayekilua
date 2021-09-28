@@ -1,6 +1,8 @@
 let sketch = (p) => {
 	let Stamper
 	let Token
+	let NFT
+	let NFTMarket
 	let greeting = `default greeting` 
 	const stamperAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
 	const tokenAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"
@@ -158,6 +160,20 @@ let sketch = (p) => {
 			})
 			.then(jsondata => {
 				Token = jsondata;
+			})
+		fetch("/assets/NFT.json")
+			.then(response => {
+   				return response.json()
+			})
+			.then(jsondata => {
+				NFT = jsondata;
+			})
+		fetch("/assets/NFTMarket.json")
+			.then(response => {
+   				return response.json()
+			})
+			.then(jsondata => {
+				NFTMarket = jsondata;
 			})
 	}
 
