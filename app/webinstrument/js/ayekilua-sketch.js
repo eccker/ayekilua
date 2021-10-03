@@ -119,17 +119,28 @@ let sketch = (p) => {
 			let tokenId = _value.toNumber()
 
 			const price = ethers.utils.parseUnits(_price, 'ether')
-
 			contract = new ethers.Contract(marketAddress, NFTMarket.abi, signer)
 			let listingPrice = await contract.getListingPrice()
-			// listingPrice = listingPrice.toString()
-			// console.log(listingPrice)
-
 			transaction = await contract.createMarketItem(NFTAddress, tokenId, price, {
 				value: listingPrice
 			})
 			await transaction.wait()
+			return tokenId
+		}
+	}
 
+	let saleNFTItem = async (_price, _tokenId) => {
+		if (typeof window.ethereum !== 'undefined') {
+			await requestAccount()
+			const provider = new ethers.providers.Web3Provider(window.ethereum);
+			const signer = provider.getSigner()
+			const price = ethers.utils.parseUnits(_price, 'ether')
+			let contract = new ethers.Contract(marketAddress, NFTMarket.abi, signer)
+			let listingPrice = await contract.getListingPrice()
+			transaction = await contract.createMarketItem(NFTAddress, _tokenId, price, {
+				value: listingPrice
+			})
+			await transaction.wait()
 		}
 	}
 
