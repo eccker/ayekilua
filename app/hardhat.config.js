@@ -29,6 +29,10 @@ module.exports = {
     ropsten:{
       url:"https://ropsten.infura.io/v3/7fc8b1e024424a7da9f920edac1b416e", 
       accounts:[`0x${_ACCOUNT_KEY}`]
+    },
+    mumbai:{
+      url:"https://polygon-mumbai.infura.io/v3/7fc8b1e024424a7da9f920edac1b416e", 
+      accounts:[`0x${_ACCOUNT_KEY}`]
     }
   }
 };
