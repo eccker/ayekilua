@@ -15,7 +15,7 @@ let sketch = (p) => {
 		return decodeURIComponent(escape(window.atob(str)));
 	}
 
-	let generateDistortedAyekiluaInDOM = (modifyShapeByDistortion, _distortion, _SVGPoints3DArray, _ayekiluaCommands, SVGDOMElement) => {
+	let generateDistortedAyekiluaInDOM = (_distortion, _SVGPoints3DArray, _ayekiluaCommands, SVGDOMElement) => {
 		let ayekiluaModifiedPathArray = modifyShapeByDistortion(_distortion, _SVGPoints3DArray)
 		let ayekiluaModifiedPathString = convert3DArrayToDPathString(ayekiluaModifiedPathArray, _ayekiluaCommands)
 		SVGDOMElement.setAttribute('d', ayekiluaModifiedPathString)
@@ -264,7 +264,7 @@ let sketch = (p) => {
 					if (!isNaN(currentPoint)) {
 						xoff = xoff - 0.618
 						let n = p.noise(xoff) * 0.618382 * p.map(_distortion, 0, 2, -128, 128)
-						modifiedShapeData3DArray[jj][kk][ll] = (currentPoint + n)
+						modifiedShapeData3DArray[jj][kk][ll] = parseInt(currentPoint + n)
 					}
 				}
 			}
@@ -373,7 +373,7 @@ let sketch = (p) => {
 					return a + b
 				})
 				positionActual = parseFloat(sum)
-				generateDistortedAyekiluaInDOM(modifyShapeByDistortion, positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+				generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
 				flag2 = false
 			}
 		)
@@ -389,9 +389,12 @@ let sketch = (p) => {
 		// path d is extracted from source SVG
 		ayekiluaPath = ayekiluaElement.getAttribute('d')
 		ayekiluaCommands = ayekiluaPath.split(/(?=[lmcLMC])/)
+		
 
 		ayekiluaPoints3DArray = ayekiluaCommands.map((cmd) => {
+			console.log(`This is the current cmd: ${cmd}`)
 			let pointsArray = cmd.slice(0, -1).split(' ')
+			console.log(pointsArray)
 			let pairsArray = []
 			for (let i = 1; i < pointsArray.length; i += 1) {
 				let pairToPush = pointsArray[i].split(',')
@@ -402,7 +405,9 @@ let sketch = (p) => {
 			return pairsArray
 		})
 
-		generateDistortedAyekiluaInDOM(modifyShapeByDistortion, 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+		console.dir(ayekiluaPoints3DArray)
+
+		generateDistortedAyekiluaInDOM( 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
 
 		someHeartBeatPeriod = 1000 * (Math.floor(Math.random() * 32) + 1)
 	}
@@ -455,7 +460,7 @@ let sketch = (p) => {
 					((p.height / 2) + (p.height / 4))
 				)
 			}
-			generateDistortedAyekiluaInDOM(modifyShapeByDistortion, positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+			generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
 		}
 	}
 
@@ -509,7 +514,9 @@ let sketch = (p) => {
 		ayekiluaElement.style.fill = tempcol
 		positionActual = (p.mouseY + p.mouseX) / (p.width + p.height)
 		// modifyAyekilua(positionActual)
-		generateDistortedAyekiluaInDOM(modifyShapeByDistortion, positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+		generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+		console.dir(ayekiluaPoints3DArray)
+		console.dir(ayekiluaCommands)
 
 		let currentJWT = window.localStorage.getItem('userJWT')
 		let oHeader = {
