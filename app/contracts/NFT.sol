@@ -2,45 +2,144 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
+
 
 import "base64-sol/base64.sol";
 
 import "hardhat/console.sol";
 
-contract NFT is ERC721URIStorage {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+contract NFT is ERC721URIStorage, VRFConsumerBase, Ownable  {
+    // using Counters for Counters.Counter;
+    // Counters.Counter private _tokenIds;
     address contractAddress;
+    // address payable public owner;
 
     uint256 public tokenCounter;
 
-    event CreatedNFT(uint256 indexed tokenId, string tokenURI);
+    bytes32 public keyHash;
+    uint256 public fee;
+    uint256 public price;
 
-    constructor(address marketplaceAddress)
+    // bytes32 public g_requestId;
+
+    string[] public bases;
+    string[] public eyes;
+    string[] public mouths;
+    
+
+    mapping(bytes32 => address) public requestIdToSender;
+    mapping(bytes32 => uint256) public requestIdToToken;
+    mapping(uint256 => uint256) public tokenIdToRandomNumber;
+    // mapping(uint256 => bytes32) public tokekIdToRequestId;
+
+
+    // mapping(bytes32 => string) public requestIdToSender_d_params;
+    // mapping(bytes32 => string) public requestIdToSender_svgname;
+    // mapping(bytes32 => string) public requestIdToSender_description;
+    // mapping(bytes32 => string) public requestIdToSender_color;
+
+
+    // event CreatedNFT(uint256 indexed tokenId, string tokenURI);
+    event CreatedUnfinishedRandomSVG(uint256 indexed tokenId, uint256 random);
+    event CreatedRandomSVG(uint256 indexed tokenId, string svg );
+    event requestedRandomSVG(bytes32 indexed requestId, uint256 indexed tokenId);
+
+    constructor(address marketplaceAddress, address _VRFCoordinator, address _LinkToken, bytes32 _keyHash, uint256 _fee )  VRFConsumerBase(
+            _VRFCoordinator, // VRF Coordinator
+            _LinkToken  // LINK Token
+        )
         ERC721("Ayekiluas NFT", "AYEKILUAS")
     {
         contractAddress = marketplaceAddress;
         tokenCounter = 0;
+        keyHash = _keyHash;
+        fee = _fee;
+        // owner = payable(msg.sender);
+        //    1.000000000000000000
+        price =  25000000000000000;
+        bases = ["axolotl", "axolotl", "salamandra", "ajolote", "salamandra", "ajolote","salamandra", "ajolote", "salamandra", "ajolote", "xolotl", "xolotl", "salamandra", "ajolote", "salamandra", "ajolote", "salamandra", "ajolote", "ajolote", "mexolotl", "mexolotl","salamandra", "ajolote", "salamandra", "ajolote", "salamandra", "ajolote", "ajolote", "salamandra", "salamandra", "ambystoma mexicanum"];
+        eyes = ["big", "small", "large", "flirty", "seductor"];
+        mouths = ["smily","sad","open", "flat", "lips bite", "kiss"];
     }
 
-    function createSVGNFT(string memory _d_params, string memory _name, string memory _description,string memory color) public returns (uint256) {
-        tokenCounter = tokenCounter + 1;
+    // modifier onlyOwner(){
+    //     require(msg.sender == owner, "not owner");
+    //     _;
+    // }
+
+    function withdraw() public payable onlyOwner {
+        payable(owner()).transfer(address(this).balance);
+    }
+
+    // function getTokenIdFromRequestId(bytes32 _requestId) public view returns (uint256){
+    //     return requestIdToToken[_requestId];
+    // }
+
+
+    function create() public payable returns (bytes32 requestId){
         // TODO decode params to modify ayekilua
-        string memory _svg = generateAyekiluaSVG(tokenCounter, _d_params, _name, _description, color);
+        require(msg.value >= price, "Need to seend 0.025 coins");
+        require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK in the contract address to process randomness requests.");
+        
+        requestId = requestRandomness(keyHash, fee);
 
-        _mint(msg.sender, tokenCounter);
-        string memory imageURI = svgToImageURI(_svg);
-        string memory tokenURI = formatTokenURI(imageURI, tokenCounter, _name, _description);
-        _setTokenURI(tokenCounter, tokenURI);
-        setApprovalForAll(contractAddress, true);
-        emit CreatedNFT(tokenCounter, tokenURI);
-        return tokenCounter;
+        // requestIdToSender_d_params[requestId] = _d_params; 
+        // requestIdToSender_svgname[requestId] = _name;
+        // requestIdToSender_description[requestId] = _description;
+        // requestIdToSender_color[requestId] = _color;
+        requestIdToSender[requestId] = msg.sender;
+        requestIdToToken[requestId] = tokenCounter;
+        uint256 tokenId = tokenCounter;
+        // tokekIdToRequestId[tokenId] = requestId;
+        tokenCounter = tokenCounter + 1;
+        
+        emit requestedRandomSVG(requestId, tokenId);
     }
 
-    function generateAyekiluaSVG(uint256 tokenId, string memory _d_params, string memory _name, string memory _description, string memory _color) public pure returns (string memory _generatedSVG ) {
+    /**
+     * Callback function used by VRF Coordinator
+     */
+    function fulfillRandomness(bytes32 _requestId, uint256 randomness) internal override {
+        address nftOwner = requestIdToSender[_requestId];
+        uint256 tokenId = requestIdToToken[_requestId];
+        _safeMint(nftOwner, tokenId);
+        tokenIdToRandomNumber[tokenId] = randomness;
+        emit CreatedUnfinishedRandomSVG(tokenId, randomness);
+    }
+
+    function finishMint(uint256 tokenId, string memory _d_params, string memory _svgname, string memory _description, string memory _color) public {
+        require(bytes(tokenURI(tokenId)).length <= 0, "tokenURI is already set!"); 
+        require(tokenCounter > tokenId, "TokenId has not been minted yet!");
+        require(tokenIdToRandomNumber[tokenId] > 0, "Need to wait for the Chainlink node to respond!");
+        uint256 randomNumber = tokenIdToRandomNumber[tokenId];
+        // bytes32 _requestId = tokekIdToRequestId[tokenId];
+        string memory svg = generateAyekiluaSVG(tokenId, _d_params, _svgname, _description, _color, randomNumber);
+        string memory imageURI = svgToImageURI(svg);
+        string memory tokenURI = formatTokenURI(imageURI, tokenId, _svgname, _description, randomNumber);
+        _setTokenURI(tokenId, tokenURI);
+        setApprovalForAll(contractAddress, true);
+        emit CreatedRandomSVG(tokenId, svg);
+    }
+
+
+    //    function createSVGNFT(string memory _d_params, string memory _name, string memory _description,string memory color) public returns (uint256) {
+    // function createSVGNFT(uint256 _random) public returns (uint256) {
+    //     string memory _svg = generateAyekiluaSVG(requestIdToToken[_requestId], requestIdToSender_d_params[_requestId], requestIdToSender_svgname[_requestId], requestIdToSender_description[_requestId], requestIdToSender_color[_requestId], _random);
+    //     _mint(requestIdToSender[_requestId], requestIdToToken[_requestId]);
+    //     string memory imageURI = svgToImageURI(_svg);
+    //     string memory tokenURI = formatTokenURI(imageURI, requestIdToToken[_requestId], requestIdToSender_svgname[_requestId], requestIdToSender_description[_requestId], _random);
+    //     _setTokenURI(requestIdToToken[_requestId], tokenURI);
+    //     setApprovalForAll(contractAddress, true);
+    //     emit CreatedNFT(requestIdToToken[_requestId], tokenURI);
+    //     return requestIdToToken[_requestId];
+    // }
+
+    function generateAyekiluaSVG(uint256 tokenId, string memory _d_params, string memory _name, string memory _description, string memory _color, uint256 _random) public pure returns (string memory _generatedSVG ) {
         return string(
             abi.encodePacked(
                 '<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" height="350" width="350" version="1.1" viewBox="0 0 175 350" id="ayekilua_svg">',
@@ -50,12 +149,11 @@ contract NFT is ERC721URIStorage {
                 'body {fill: #fff;}',
                 '</style>',
                 '</defs>',
-                '<desc>',_description,' </desc>',
+                '<desc>',_description,' ',uint2str(_random),'</desc>',
                 '<title id="ayekiluaTitle">Ayekilua #',uint2str(tokenId),': ',_name,'</title>',
                 '<path id="ayekiluaSVGPath" class="ayekiluaSVGColor" ',
                 // TODO generate approximated path by adding perlin noise
                 'd="', _d_params,'" />',
-                // 'd="m 157.13,189.17068 c 13.02162,-4.25788 35.38,0.37736 35.52323,16.93884 -2.69368,14.85707 -20.5296,15.6231 -31.01995,22.71957 -16.14218,11.64052 -5.54995,33.26293 -4.85824,49.30176 1.86077,23.12114 -15.69726,43.94754 -10.5446,67.28104 3.56622,8.37325 0.41726,23.23412 -9.41055,11.58613 -5.25331,-15.83675 -6.18183,-33.27641 -18.28826,-46.33392 -11.17981,-16.06915 -23.191867,-33.10933 -24.217663,-53.36193 -5.194231,-20.71536 -25.607472,-31.75304 -43.3084,-40.50874 -12.269794,-6.60749 -14.270109,-35.25778 4.763866,-30.12644 11.038656,8.52802 26.354518,-4.13829 16.699387,-15.70553 6.650739,-13.41379 -5.985235,-33.00239 -17.073531,-15.27902 -13.002162,10.16461 -30.643116,16.08126 -46.959159,11.40197 -10.3266369,-15.8034 19.898667,-31.86442 29.019032,-16.18264 16.750703,7.63792 31.780788,-6.68209 38.054265,-21.02126 3.370971,-8.99172 20.092623,-14.1882 15.327956,0.74465 -5.529948,14.37204 -16.222175,28.42034 -12.408604,44.64765 2.106741,8.82957 24.667971,30.70956 4.226564,29.11773 -11.057883,-5.93998 -32.934054,-30.71214 -39.354105,-7.23445 2.963264,20.20029 24.854906,28.47695 41.74267,34.39319 8.230764,6.98172 24.194622,1.3157 11.24083,-7.92672 -9.272761,-10.09977 -27.773202,-8.50639 -34.009826,-21.19298 17.880271,0.0303 30.756552,18.30797 45.922208,26.81195 17.61989,13.01756 -0.86581,29.65183 -0.0704,44.93986 -2.63369,7.8894 10.45348,30.03204 14.30543,16.87005 -0.91326,-6.25535 -4.41381,-18.74993 -0.30158,-5.34487 3.74918,17.47143 7.08861,35.4626 15.99216,51.20001 11.85191,-19.23274 2.13566,-41.87272 0.0346,-62.33543 -3.65966,-19.23824 -2.69172,-39.44369 -9.93703,-57.91879 2.4698,-13.3617 31.57689,-8.35705 30.27843,-10.91311 -17.86478,-2.70786 -24.58764,30.52943 -2.9795,22.9596 13.66634,-4.36148 28.36787,-12.7746 32.5178,-27.48107 -4.89167,-15.59844 -23.26072,-9.93155 -34.51131,-5.67069 -13.52796,8.46719 -28.17388,-5.59277 -16.48206,-17.94419 8.19289,-12.48087 -6.24461,-28.43625 0.6523,-42.39032 10.01798,-10.97469 -0.2908,-27.78552 -10.7894,-34.35546 -14.15681,-5.369493 -31.152973,-6.999144 -45.783934,-3.5976 -15.332028,7.72881 -12.677679,28.15262 -25.505146,38.20892 -13.4095,11.36278 4.194345,-13.09003 4.989489,-19.81943 3.55228,-10.66883 9.882006,-20.373223 13.31239,-30.890903 C 76.343552,67.141558 64.271081,48.458862 46.79032,44.342912 35.95249,35.240406 54.456176,31.461781 59.836561,38.486766 73.497465,38.913621 96.72912,24.283868 90.591425,10.172781 86.341646,2.010515 94.79274,-4.813746 97.623874,6.5248923 102.92421,21.901149 124.3196,38.596234 137.6279,21.753404 c 3.44784,-8.41674 26.88892,-25.1799648 23.05623,-6.579367 -2.7805,16.768906 17.86813,-7.3925843 20.72005,10.322871 13.0976,21.600364 -17.55856,24.214964 -25.29463,39.196184 -10.58478,10.251747 1.1621,29.862154 -11.26071,37.259508 -11.43408,2.27448 2.09436,23.52172 9.85622,27.94728 11.66044,6.8529 31.18787,-2.67905 34.42955,16.96921 5.89272,10.17851 -14.89844,17.29081 -6.55007,4.16904 -7.29032,-8.45981 -23.83487,-11.7826 -33.76726,-10.93395 -7.76879,12.99402 1.72419,30.36119 4.71342,44.04286 1.06096,1.76904 2.2882,3.43325 3.5993,5.02364 z" />',
                 '</svg>'
             )
         );
@@ -71,15 +169,14 @@ contract NFT is ERC721URIStorage {
             bytes(string(abi.encodePacked(_svg)))
         );
 
-        string memory _imageURI = string(
+        return string(
             abi.encodePacked(baseURL, svgBase64Encoded)
         );
-        return _imageURI;
     }
 
-    function formatTokenURI(string memory _imageURI, uint256 tokenID, string memory _name, string memory _description)
+    function formatTokenURI(string memory _imageURI, uint256 tokenID, string memory _name, string memory _description, uint256 _random)
         public
-        pure
+        view
         returns (string memory)
     {
         string memory baseURL = "data:application/json;base64,";
@@ -95,43 +192,34 @@ contract NFT is ERC721URIStorage {
                                 '"attributes": [',
                                     '{',
                                         '  "trait_type": "Base", ',
-                                        '  "value": "Starfish"',
+                                        '  "value": "', bases[_random % bases.length],'"',
                                     '}, ',
                                     '{',
                                         '  "trait_type": "Eyes", ',
-                                        '  "value": "Big"',
+                                        '  "value": "', eyes[_random % eyes.length],'"',
                                     '}, ',
                                     '{',
                                         '  "trait_type": "Mouth", ',
-                                        '  "value": "Surprised"',
-                                    '}, ',
-                                    '{',
-                                        '  "trait_type": "Level", ',
-                                        '  "value": 5',
-                                    '}, ',
-                                    '{',
-                                        '  "trait_type": "Stamina", ',
-                                        '  "value": 1.4',
-                                    '}, ',
-                                    '{',
-                                        '  "trait_type": "Personality", ',
-                                        '  "value": "Sad"',
-                                    '}, ',
-                                    '{',
-                                        '  "display_type": "boost_number", ',
-                                        '  "trait_type": "Aqua Power", ',
-                                        '  "value": 40',
-                                    '}, ',
-                                    '{',
-                                        '  "display_type": "boost_percentage", ',
-                                        '  "trait_type": "Stamina Increase", ',
-                                        '  "value": 10',
-                                        '}, ',
-                                        '{',
-                                        '  "display_type": "number", ',
-                                        '  "trait_type": "Generation", ',
-                                        '  "value": 2',
-                                        '}',
+                                        '  "value": "', mouths[_random % mouths.length],'"',
+                                    '}',
+                                    // '{',
+                                    //     '  "trait_type": "Level", ',
+                                    //     '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, levelsMax + 1 ))) % levelsMax),
+                                    // '}, ',
+                                    // '{',
+                                    //     '  "trait_type": "Personality", ',
+                                    //     '  "value": "', personalities[_random % personalities.length],'"',
+                                    // '}, ',
+                                    // '{',
+                                    //     '  "display_type": "boost_number", ',
+                                    //     '  "trait_type": "Aqua Power", ',
+                                    //     '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, aquaPowerMax        + 1 ))) % aquaPowerMax),
+                                    // '}, ',
+                                    // '{',
+                                    //     '  "display_type": "number", ',
+                                    //     '  "trait_type": "Generation", ',
+                                    //     '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, generationMax       + 1 ))) % generationMax),
+                                    // '}',
                                     '],',
                                 '"image": "', _imageURI,'"}'
                             )
@@ -162,14 +250,4 @@ contract NFT is ERC721URIStorage {
       }
       return string(bstr);
   }
-
-    function createToken(string memory tokenURI) public returns (uint256) {
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-
-        _mint(msg.sender, newItemId);
-        _setTokenURI(newItemId, tokenURI);
-        setApprovalForAll(contractAddress, true);
-        return newItemId;
-    }
 }

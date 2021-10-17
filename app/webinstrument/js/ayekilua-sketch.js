@@ -4,12 +4,21 @@ let sketch = (p) => {
 	let NFT
 	let NFTMarket
 
+	let forMint_ayekiluaModifiedPathArray
+	let forMint_ayekiluaModifiedPathString
+
+
+	
+	let forMintName
+    let forMintDescription
+	let forMintColor
+	let forMintPrice
 	let nfts
 
-	const marketAddress = "0x851356ae760d987E095750cCeb3bC6014560891C"
-	const NFTAddress = "0xf5059a5D33d5853360D16C683c16e67980206f36"
-	const tokenAddress = "0x95401dc811bb5740090279Ba06cfA8fcF6113778"
-	const stamperAddress = "0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8"
+	const marketAddress = "0xE9785453a70A9A4c32532aDAb6504A4d6cee19C9"
+	const NFTAddress = "0x15eBD791FDa17C2Ebb0547BbE6F6b8c32908C41d"
+	// const tokenAddress = "0x54333c974b791399D043756DBC077F956aeA6978"
+	// const stamperAddress = "0xF08DcdBb279175cf0742075b13990E878Bb35506"
 
 	let b64_to_utf8 = (str) => {
 		return decodeURIComponent(escape(window.atob(str)));
@@ -24,66 +33,66 @@ let sketch = (p) => {
 	}
 
 	let requestAccount = async () => {
-		await window.ethereum.request({
+		return await window.ethereum.request({
 			method: 'eth_requestAccounts'
 		});
 	}
 
 	let getBalance = async () => {
-		if (typeof window.ethereum !== 'undefined') {
-			const [account] = await window.ethereum.request({
-				method: 'eth_requestAccounts'
-			})
-			const provider = new ethers.providers.Web3Provider(window.ethereum);
-			const contract = new ethers.Contract(tokenAddress, Token.abi, provider)
-			const balance = await contract.balanceOf(account);
-			console.log("Balance: ", balance.toString());
-		}
+		// if (typeof window.ethereum !== 'undefined') {
+		// 	const [account] = await window.ethereum.request({
+		// 		method: 'eth_requestAccounts'
+		// 	})
+		// 	const provider = new ethers.providers.Web3Provider(window.ethereum);
+		// 	const contract = new ethers.Contract(tokenAddress, Token.abi, provider)
+		// 	const balance = await contract.balanceOf(account);
+		// 	console.log("Balance: ", balance.toString());
+		// }
 	}
 
 	let sendCoins = async (userAccount, amount) => {
-		if (typeof window.ethereum !== 'undefined') {
-			await requestAccount()
-			const provider = new ethers.providers.Web3Provider(window.ethereum);
-			const signer = provider.getSigner();
-			const contract = new ethers.Contract(tokenAddress, Token.abi, signer);
-			const transation = await contract.transfer(userAccount, amount);
-			await transation.wait();
-			console.log(`${amount} Coins successfully sent to ${userAccount}`);
-		}
+		// if (typeof window.ethereum !== 'undefined') {
+		// 	await requestAccount()
+		// 	const provider = new ethers.providers.Web3Provider(window.ethereum);
+		// 	const signer = provider.getSigner();
+		// 	const contract = new ethers.Contract(tokenAddress, Token.abi, signer);
+		// 	const transation = await contract.transfer(userAccount, amount);
+		// 	await transation.wait();
+		// 	console.log(`${amount} Coins successfully sent to ${userAccount}`);
+		// }
 	}
 
-	let fetchStamp = async () => {
-		if (typeof window.ethereum !== 'undefined') {
-			const provider = new ethers.providers.Web3Provider(window.ethereum)
-			const contract = new ethers.Contract(stamperAddress, Stamper.abi, provider)
-			try {
-				const data = await contract.getStamp()
-				console.log('data: ', data)
-			} catch (err) {
-				console.log("Error: ", err)
-			}
-		}
-	}
+	// let fetchStamp = async () => {
+	// 	if (typeof window.ethereum !== 'undefined') {
+	// 		const provider = new ethers.providers.Web3Provider(window.ethereum)
+	// 		const contract = new ethers.Contract(stamperAddress, Stamper.abi, provider)
+	// 		try {
+	// 			const data = await contract.getStamp()
+	// 			console.log('data: ', data)
+	// 		} catch (err) {
+	// 			console.log("Error: ", err)
+	// 		}
+	// 	}
+	// }
 
 	// call the smart contract, send an update
-	let setStamp = async () => {
-		if (!frase) return
-		if (typeof window.ethereum !== 'undefined') {
-			await requestAccount()
-			const provider = new ethers.providers.Web3Provider(window.ethereum);
-			const signer = provider.getSigner()
-			const contract = new ethers.Contract(stamperAddress, Stamper.abi, signer)
-			const transaction = await contract.setStamp(frase)
-			await transaction.wait()
-			fetchStamp()
-		}
-	}
+	// let setStamp = async () => {
+	// 	if (!frase) return
+	// 	if (typeof window.ethereum !== 'undefined') {
+	// 		await requestAccount()
+	// 		const provider = new ethers.providers.Web3Provider(window.ethereum);
+	// 		const signer = provider.getSigner()
+	// 		const contract = new ethers.Contract(stamperAddress, Stamper.abi, signer)
+	// 		const transaction = await contract.setStamp(frase)
+	// 		await transaction.wait()
+	// 		fetchStamp()
+	// 	}
+	// }
 
 	String.prototype.replaceWithUtf8 = function() {
 		function r(r) {
 		  for (var t, n, e = "", i = 0; !isNaN(t = r.charCodeAt(i++)); ) n = t.toString(16), 
-		  e += 256 > t ? "\\x" + (t > 15 ? "" :"0") + n :"\\u" + ("0000" + n).slice(-4);
+		  e += 256 > t ? "\\\\x" + (t > 15 ? "" :"0") + n :"\\u" + ("0000" + n).slice(-4);
 		  return e;
 		}
 		var a, c, o, u, s, e = "", i = this, t = [ "/", '"' ], n = [ "\\/", '\\"' ];
@@ -100,34 +109,64 @@ let sketch = (p) => {
 	
 
 	// call the smart contract, send an update
-	let createNFTItem = async (_price, _name,_description, _color) => {
+	let createNFTItem = async () => {
 		if (typeof window.ethereum !== 'undefined') {
-			await requestAccount()
-			const provider = new ethers.providers.Web3Provider(window.ethereum);
+			const [account] = await requestAccount();
+			console.dir(account)
+			const provider = new ethers.providers.Web3Provider(window.ethereum)
 			const signer = provider.getSigner()
 			let contract = new ethers.Contract(NFTAddress, NFT.abi, signer)
 			// Generate SVG Path
-			let ayekiluaModifiedPathArray = modifyShapeByDistortion(positionActual, ayekiluaPoints3DArray)
-			ayekiluaModifiedPathString = convert3DArrayToDPathString(ayekiluaModifiedPathArray, ayekiluaCommands)
+			
+			// console.log(ayekiluaModifiedPathString.length)
+			console.log(`____________________________________________________________` )
+			p.noLoop()
 
 			// Generate NFT
-			let transaction = await contract.createSVGNFT(ayekiluaModifiedPathString, _name.replaceWithUtf8(), _description.replaceWithUtf8(), _color)
-			let tx = await transaction.wait()
+			// let requestId = await contract.createRandomSVGNFT(ayekiluaModifiedPathString, _name.replaceWithUtf8(), _description.replaceWithUtf8(), _color, {gasLimit: 5000000})
+			// let tx = await requestId.wait(10);
+			// '25000000000000000'
+			
+			const _mintprice = ethers.utils.parseUnits('0.025', 'ether')
+			tx = await contract.create({ gasLimit: 3000000, value: _mintprice})
 
-			let event = tx.events[0]
-			let _value = event.args[2]
-			let tokenId = _value.toNumber()
+			await new Promise(r => setTimeout(r, 180000))
+			p.loop()
+    		let receipt = await tx.wait(1)
+    		// let tokenId = receipt.events[3].topics[2]
 
-			const price = ethers.utils.parseUnits(_price, 'ether')
-			contract = new ethers.Contract(marketAddress, NFTMarket.abi, signer)
-			let listingPrice = await contract.getListingPrice()
-			transaction = await contract.createMarketItem(NFTAddress, tokenId, price, {
-				value: listingPrice
-			})
-			await transaction.wait()
-			return tokenId
+			// console.dir(requestId)
+			console.log(`****____________________________________________________________` )
+			console.dir(`El tokenId es: ${receipt}`)
+			// console.log(`++++++++____________________________________________________________` )
 		}
 	}
+
+	let finishMinting = async () => {
+		if (typeof window.ethereum !== 'undefined') {
+			const [account] = await requestAccount();
+			console.dir(account)
+			const provider = new ethers.providers.Web3Provider(window.ethereum)
+			const signer = provider.getSigner()
+			let contract = new ethers.Contract(NFTAddress, NFT.abi, signer)
+
+			// let ayekiluaModifiedPathArray = modifyShapeByDistortion(positionActual, ayekiluaPoints3DArray)
+			// let ayekiluaModifiedPathString = convert3DArrayToDPathString(ayekiluaModifiedPathArray, ayekiluaCommands)
+
+			// forMintDescription
+			// forMintColor 
+			// forMint_ayekiluaModifiedPathString
+
+			// let transaction = await contract.finishMint(0, forMint_ayekiluaModifiedPathString, forMintName.replaceWithUtf8(), forMintDescription.replaceWithUtf8(), forMintColor);
+			// await transaction.wait()
+			console.log(`You can view the tokenURI here ${await contract.tokenURI(0)}`)
+			p.loop()
+		}
+	}
+
+	
+	
+
 
 	let saleNFTItem = async (_price, _tokenId) => {
 		if (typeof window.ethereum !== 'undefined') {
@@ -150,8 +189,10 @@ let sketch = (p) => {
 
 		const tokenContract = new ethers.Contract(NFTAddress, NFT.abi, provider)
 		const marketContract = new ethers.Contract(marketAddress, NFTMarket.abi, provider)
+		console.log(`You can view the tokenURI here ${await tokenContract.tokenURI(2)}`)
 
-		const data = await marketContract.fetchMarketItems()
+		const data = await marketContract.fetchItemsCreated()
+		// const data = await marketContract.fetchMarketItems()
 		// await data.wait()
 
 		const items = await Promise.all(data.map(async i => {
@@ -200,7 +241,7 @@ let sketch = (p) => {
 		}))
 		return items
 	}
-	async function buyNft(_nft) {
+	async function buyNft() {
 		// const web3Modal = new Web3Modal()
 		// const connection = await web3Modal.connect()
 		// const provider = new ethers.providers.Web3Provider(connection)
@@ -209,8 +250,8 @@ let sketch = (p) => {
 		const signer = provider.getSigner()
 		const contract = new ethers.Contract(marketAddress, NFTMarket.abi, signer)
 
-		const price = ethers.utils.parseUnits(_nft.price.toString(), 'ether')
-		const transaction = await contract.createMarketSale(NFTAddress, _nft.tokenId, {
+		const price = ethers.utils.parseUnits('0.09', 'ether')
+		const transaction = await contract.createMarketSale(NFTAddress, 0, {
 			value: price
 		})
 		await transaction.wait()
@@ -300,20 +341,20 @@ let sketch = (p) => {
 			glBandera = true
 		}
 		rg.loadFrom(`./../assets/ayekilua.json`, gramaticaLista)
-		fetch("/assets/Stamper.json")
-			.then(response => {
-				return response.json()
-			})
-			.then(jsondata => {
-				Stamper = jsondata;
-			})
-		fetch("/assets/Token.json")
-			.then(response => {
-				return response.json()
-			})
-			.then(jsondata => {
-				Token = jsondata;
-			})
+		// fetch("/assets/Stamper.json")
+		// 	.then(response => {
+		// 		return response.json()
+		// 	})
+		// 	.then(jsondata => {
+		// 		Stamper = jsondata;
+		// 	})
+		// fetch("/assets/Token.json")
+		// 	.then(response => {
+		// 		return response.json()
+		// 	})
+		// 	.then(jsondata => {
+		// 		Token = jsondata;
+		// 	})
 		fetch("/assets/NFT.json")
 			.then(response => {
 				return response.json()
@@ -392,9 +433,9 @@ let sketch = (p) => {
 		
 
 		ayekiluaPoints3DArray = ayekiluaCommands.map((cmd) => {
-			console.log(`This is the current cmd: ${cmd}`)
+			// console.log(`This is the current cmd: ${cmd}`)
 			let pointsArray = cmd.slice(0, -1).split(' ')
-			console.log(pointsArray)
+			// console.log(pointsArray)
 			let pairsArray = []
 			for (let i = 1; i < pointsArray.length; i += 1) {
 				let pairToPush = pointsArray[i].split(',')
@@ -404,8 +445,6 @@ let sketch = (p) => {
 			}
 			return pairsArray
 		})
-
-		console.dir(ayekiluaPoints3DArray)
 
 		generateDistortedAyekiluaInDOM( 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
 
@@ -475,12 +514,19 @@ let sketch = (p) => {
 					link.delete;
 				})
 		}
+
+		if (p.key === 'f') {
+			finishMinting()
+		}
 		if (p.key === 's') {
-			setStamp()
+			// setStamp()
+			let userSelectedToken = prompt(`Which tokenId do you want to buy?`)
+			saleNFTItem(forMintPrice,0)
 		}
 		if (p.key === 'b') {
 			getBalance()
 			nfts = await loadNFTs()
+			console.dir(nfts)
 		}
 		if (p.key === 'm') {
 			mynfts = await loadMyNFTs()
@@ -489,21 +535,43 @@ let sketch = (p) => {
 		if (p.key === 'B') {
 			console.dir(nfts)
 			let userSelectedToken = prompt(`Which tokenId do you want to buy?`)
-			buyNft(nfts[userSelectedToken])
+			buyNft()
 			nfts = await loadNFTs()
 		}
 		if (p.key === 'X') {
 			sendCoins('0x8bBd610542c67B355CC0152511ac2b3560F7d13c', 10000000000);
 		}
 		if (p.key === 'N') {
-
+			p.noLoop()
 			let user_name = prompt("Define a Name for this NFT?")
 			let user_price = prompt("Set a price for this NFT?")
-			console.log(isNaN(parseFloat(user_price)))
 			while (isNaN(parseFloat(user_price))) {
 				user_price = prompt("What is the price you pay for this NFT?")
 			}
-			createNFTItem(user_price, user_name, frase, tempcol.substring(1))
+
+			forMintName = user_name
+			forMintDescription = frase
+			forMintColor = tempcol.substring(1)
+			forMintPrice = user_price
+			forMint_ayekiluaModifiedPathArray = modifyShapeByDistortion(positionActual, ayekiluaPoints3DArray)
+			forMint_ayekiluaModifiedPathString = convert3DArrayToDPathString(forMint_ayekiluaModifiedPathArray, ayekiluaCommands)
+
+			createNFTItem(parseFloat(user_price))
+		}
+		if (p.key === 'k') {
+			p.noLoop()
+			let user_name = prompt("Define a Name for this NFT?")
+			let user_price = prompt("Set a price for this NFT?")
+			while (isNaN(parseFloat(user_price))) {
+				user_price = prompt("What is the price you pay for this NFT?")
+			}
+
+			forMintName = user_name
+			forMintDescription = frase
+			forMintPrice = user_price
+			forMintColor = tempcol.substring(1)
+			forMint_ayekiluaModifiedPathArray = modifyShapeByDistortion(positionActual, ayekiluaPoints3DArray)
+			forMint_ayekiluaModifiedPathString = convert3DArrayToDPathString(forMint_ayekiluaModifiedPathArray, ayekiluaCommands)
 		}
 	}
 
@@ -515,9 +583,7 @@ let sketch = (p) => {
 		positionActual = (p.mouseY + p.mouseX) / (p.width + p.height)
 		// modifyAyekilua(positionActual)
 		generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-		console.dir(ayekiluaPoints3DArray)
-		console.dir(ayekiluaCommands)
-
+	
 		let currentJWT = window.localStorage.getItem('userJWT')
 		let oHeader = {
 			alg: 'HS256',
