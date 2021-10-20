@@ -20,12 +20,16 @@ contract NFT is ERC721URIStorage, VRFConsumerBase, Ownable  {
 
     bytes32 public keyHash;
     uint256 public fee;
-    uint256 public price;
+    uint256 public priceForMinting;
 
     string[] public bases;
     string[] public eyes;
     string[] public mouths;
-    uint256 public levelsMax;    
+    string[] public personalities;
+
+    // uint256 public levelsMax;    
+    // uint256 public aquaPowerMax;    
+    // uint256 public generationMax;    
 
     mapping(bytes32 => address) public requestIdToSender;
     mapping(bytes32 => uint256) public requestIdToToken;
@@ -40,32 +44,41 @@ contract NFT is ERC721URIStorage, VRFConsumerBase, Ownable  {
             _VRFCoordinator, // VRF Coordinator
             _LinkToken  // LINK Token
         )
-        ERC721("Ayekiluas NFT", "AYEKILUAS")
+        ERC721("__Ayekiluas NFT", "__AYEKILUAS")
     {
         contractAddress = marketplaceAddress;
         tokenCounter = 0;
         keyHash = _keyHash;
         fee = _fee;
-        price =  25000000000000000;
-        levelsMax = 100;
+        // priceForMinting =  26180000000000000;
+        priceForMinting =  0.02618 ether;  
         bases = ["axolotl", "axolotl", "salamandra", "ajolote", "salamandra", "ajolote","salamandra", "ajolote", "salamandra", "ajolote", "xolotl", "xolotl", "salamandra", "ajolote", "salamandra", "ajolote", "salamandra", "ajolote", "ajolote", "mexolotl", "mexolotl","salamandra", "ajolote", "salamandra", "ajolote", "salamandra", "ajolote", "ajolote", "salamandra", "salamandra", "ambystoma mexicanum"];
         eyes = ["big", "small", "large", "flirty", "seductor"];
         mouths = ["smily","sad","open", "flat", "lips bite", "kiss"];
+        personalities = ["fun","sad","mysterious","extrovert", "shy", "courageous"];
     }
 
     function withdraw() public payable onlyOwner {
         payable(owner()).transfer(address(this).balance);
     }
 
+    function setMintPrice(uint256 _mintPrice) public onlyOwner {
+        priceForMinting =  _mintPrice;
+    }
+
+    function getMintPrice() public view returns (uint256){
+        return priceForMinting;
+    }
+
     function create() public payable returns (bytes32 requestId){
         // TODO decode params to modify ayekilua
-        require(msg.value >= price, "Need to seend 0.061 coins");
+        require(msg.value >= priceForMinting, "Need to seend 0.02618 coins");
         require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK in the contract address to process randomness requests.");
         requestId = requestRandomness(keyHash, fee);
         requestIdToSender[requestId] = msg.sender;
         requestIdToToken[requestId] = tokenCounter;
         uint256 tokenId = tokenCounter;
-        tokenIdToRequestId[tokenId] = tokenId;
+        tokenIdToRequestId[tokenId] = requestId;
         tokenCounter = tokenCounter + 1;
         emit requestedRandomSVG(requestId, tokenId);
     }
@@ -83,7 +96,7 @@ contract NFT is ERC721URIStorage, VRFConsumerBase, Ownable  {
 
     function finishMint(uint256 tokenId, string memory _d_params, string memory _svgname, string memory _description, string memory _color) public {
         // require(bytes(tokenURI(tokenId)).length <= 0, "tokenURI is already set!");
-        bytes32 memory requestId = tokenIdToRequestId[tokenId];
+        bytes32 requestId = tokenIdToRequestId[tokenId];
         require(msg.sender == requestIdToSender[requestId], "Not owner of this token");
         require(tokenCounter > tokenId, "TokenId has not been minted yet!");
         require(tokenIdToRandomNumber[tokenId] > 0, "Need to wait for the Chainlink node to respond!");
@@ -158,24 +171,24 @@ contract NFT is ERC721URIStorage, VRFConsumerBase, Ownable  {
                                         '  "trait_type": "Mouth", ',
                                         '  "value": "', mouths[_random % mouths.length],'"',
                                     '}, ',
-                                    '{',
-                                        '  "trait_type": "Level", ',
-                                        '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, levelsMax + 1 ))) % levelsMax),
-                                    '}, ',
+                                    // '{',
+                                    //     '  "trait_type": "Level", ',
+                                    //     '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, levelsMax + 1 ))) % levelsMax),
+                                    // '}, ',
                                     '{',
                                         '  "trait_type": "Personality", ',
                                         '  "value": "', personalities[_random % personalities.length],'"',
-                                    '}, ',
-                                    '{',
-                                        '  "display_type": "boost_number", ',
-                                        '  "trait_type": "Aqua Power", ',
-                                        '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, aquaPowerMax        + 1 ))) % aquaPowerMax),
-                                    '}, ',
-                                    '{',
-                                        '  "display_type": "number", ',
-                                        '  "trait_type": "Generation", ',
-                                        '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, generationMax       + 1 ))) % generationMax),
-                                    '}',
+                                    '} ',
+                                    // '{',
+                                    //     '  "display_type": "boost_number", ',
+                                    //     '  "trait_type": "Aqua Power", ',
+                                    //     '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, aquaPowerMax        + 1 ))) % aquaPowerMax),
+                                    // '} ',
+                                    // '{',
+                                    //     '  "display_type": "number", ',
+                                    //     '  "trait_type": "Generation", ',
+                                    //     '  "value": ',uint2str(uint256(keccak256(abi.encode(_random, generationMax       + 1 ))) % generationMax),
+                                    // '}',
                                     '],',
                                 '"image": "', _imageURI,'"}'
                             )

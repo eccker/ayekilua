@@ -15,8 +15,8 @@ let sketch = (p) => {
 	let forMintPrice
 	let nfts
 
-	const marketAddress = "0xE9785453a70A9A4c32532aDAb6504A4d6cee19C9"
-	const NFTAddress = "0x15eBD791FDa17C2Ebb0547BbE6F6b8c32908C41d"
+	const marketAddress = "0x6806eCB13d6c826A95B69Cbc83258aC3612A3521"
+	const NFTAddress = "0x2f3F71167EFa74b55DCd04bE82C68d3ad5a4fACC"
 	// const tokenAddress = "0x54333c974b791399D043756DBC077F956aeA6978"
 	// const stamperAddress = "0xF08DcdBb279175cf0742075b13990E878Bb35506"
 
@@ -127,7 +127,7 @@ let sketch = (p) => {
 			// let tx = await requestId.wait(10);
 			// '25000000000000000'
 			
-			const _mintprice = ethers.utils.parseUnits('0.025', 'ether')
+			const _mintprice = ethers.utils.parseUnits('0.02618', 'ether')
 			tx = await contract.create({ gasLimit: 3000000, value: _mintprice})
 
 			await new Promise(r => setTimeout(r, 180000))
@@ -156,10 +156,10 @@ let sketch = (p) => {
 			// forMintDescription
 			// forMintColor 
 			// forMint_ayekiluaModifiedPathString
-
-			// let transaction = await contract.finishMint(0, forMint_ayekiluaModifiedPathString, forMintName.replaceWithUtf8(), forMintDescription.replaceWithUtf8(), forMintColor);
-			// await transaction.wait()
-			console.log(`You can view the tokenURI here ${await contract.tokenURI(0)}`)
+			let selectedTokenId = parseInt(prompt("Select tokenId: "))
+			let transaction = await contract.finishMint(selectedTokenId, forMint_ayekiluaModifiedPathString, forMintName.replaceWithUtf8(), forMintDescription.replaceWithUtf8(), forMintColor);
+			await transaction.wait()
+			console.log(`You can view the tokenURI here ${await contract.tokenURI(selectedTokenId)}`)
 			p.loop()
 		}
 	}
@@ -333,6 +333,28 @@ let sketch = (p) => {
 		return ayekiluaPathModified
 	}
 
+	let getPathDataFromDOMById = (svgPathId) => {
+		let element = document.getElementById(svgPathId)
+		let path = element.getAttribute('d')
+		let commands = path.split(/(?=[lmcLMC])/)
+		let result = commands.map((cmd) => {
+			let pointsArray = cmd.slice(0, -1).split(' ')
+			let pairsArray = []
+			for (let i = 1; i < pointsArray.length; i += 1) {
+				let pairToPush = pointsArray[i].split(',')
+				if (pairToPush != 'z') {
+					pairsArray.push(pairToPush)
+				}
+			}
+			return pairsArray
+		})
+		return {
+			"data":result,
+			"commands": commands, 
+			"element": element
+		}
+	}
+
 	p.preload = () => {
 		rg = new RiGrammar()
 		let gramaticaLista = () => {
@@ -340,7 +362,7 @@ let sketch = (p) => {
 			words = RiTa.tokenize(`${result} tomo una mordida!`)
 			glBandera = true
 		}
-		rg.loadFrom(`./../assets/ayekilua.json`, gramaticaLista)
+		rg.loadFrom(`./../assets/ayekilua_en.json`, gramaticaLista)
 		// fetch("/assets/Stamper.json")
 		// 	.then(response => {
 		// 		return response.json()
@@ -377,7 +399,7 @@ let sketch = (p) => {
 		canvasApp.id('canvas')
 		canvasApp.position(0, 0, 'fixed')
 		p.select('#initialDiv') ? p.select('#initialDiv').remove() : null
-		p.frameRate(12)
+		p.frameRate(24)
 		p.background(127) // clear the screen
 		socket = io({
 			transports: ['websocket']
@@ -425,30 +447,16 @@ let sketch = (p) => {
 			}
 		)
 
-		ayekiluaElement = document.getElementById('ayekiluaSVGPath')
+		pathObj = getPathDataFromDOMById('ayekiluaSVGPath')
 
-		// path d is extracted from source SVG
-		ayekiluaPath = ayekiluaElement.getAttribute('d')
-		ayekiluaCommands = ayekiluaPath.split(/(?=[lmcLMC])/)
-		
-
-		ayekiluaPoints3DArray = ayekiluaCommands.map((cmd) => {
-			// console.log(`This is the current cmd: ${cmd}`)
-			let pointsArray = cmd.slice(0, -1).split(' ')
-			// console.log(pointsArray)
-			let pairsArray = []
-			for (let i = 1; i < pointsArray.length; i += 1) {
-				let pairToPush = pointsArray[i].split(',')
-				if (pairToPush != 'z') {
-					pairsArray.push(pairToPush)
-				}
-			}
-			return pairsArray
-		})
+		ayekiluaPoints3DArray = pathObj.data
+		ayekiluaCommands = pathObj.commands
+		ayekiluaElement = pathObj.element
 
 		generateDistortedAyekiluaInDOM( 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
 
 		someHeartBeatPeriod = 1000 * (Math.floor(Math.random() * 32) + 1)
+
 	}
 
 	p.windowResized = () => {
