@@ -24,12 +24,12 @@ let sketch = (p) => {
 		return decodeURIComponent(escape(window.atob(str)));
 	}
 
-	let generateDistortedAyekiluaInDOM = (_distortion, _SVGPoints3DArray, _ayekiluaCommands, SVGDOMElement) => {
+	let generateDistortedAyekiluaInDOM = (_distortion, _SVGPoints3DArray, _ayekiluaCommands, SVGDOMElement, _svgId) => {
 		let ayekiluaModifiedPathArray = modifyShapeByDistortion(_distortion, _SVGPoints3DArray)
 		let ayekiluaModifiedPathString = convert3DArrayToDPathString(ayekiluaModifiedPathArray, _ayekiluaCommands)
 		SVGDOMElement.setAttribute('d', ayekiluaModifiedPathString)
-		document.getElementById('ayekilua_svg').setAttribute('width', p.width)
-		document.getElementById('ayekilua_svg').setAttribute('height', p.height)
+		document.getElementById(_svgId).setAttribute('width', p.width)
+		document.getElementById(_svgId).setAttribute('height', p.height)
 	}
 
 	let requestAccount = async () => {
@@ -439,7 +439,7 @@ let sketch = (p) => {
 					return a + b
 				})
 				positionActual = parseFloat(sum)
-				generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+				generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement,'cryptokeanuSVGhair')
 				flag2 = false
 			}
 		)
@@ -450,17 +450,20 @@ let sketch = (p) => {
 			}
 		)
 
-		let pathObj1 = getPathDataFromDOMById('ayekiluaSVGPath')
-		pathObj2 = getPathDataFromDOMById('ayekiluaSVGPath02')
-		pathObj3 = getPathDataFromDOMById('ayekiluaSVGPath03')
+		let pathObj1 = getPathDataFromDOMById('cryptokeanuSVGhair')
+		pathObj2 = getPathDataFromDOMById('cryptokeanuSVGeyes')
+		pathObj3 = getPathDataFromDOMById('cryptokeanuSVGneck')
+
+		document.getElementById('cryptokeanuSVG').setAttribute('width', p.windowWidth)
+		document.getElementById('cryptokeanuSVG').setAttribute('height', p.windowHeight)
 
 		ayekiluaPoints3DArray = pathObj1.data
 		ayekiluaCommands = pathObj1.commands
 		ayekiluaElement = pathObj1.element
 
-		generateDistortedAyekiluaInDOM( 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-		generateDistortedAyekiluaInDOM( 1, pathObj2.data, pathObj2.commands, pathObj2.element)
-		generateDistortedAyekiluaInDOM( 1, pathObj3.data, pathObj3.commands, pathObj3.element)
+		generateDistortedAyekiluaInDOM( 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement,'cryptokeanuSVGhair')
+		generateDistortedAyekiluaInDOM( 1, pathObj2.data, pathObj2.commands, pathObj2.element,'cryptokeanuSVGeyes')
+		generateDistortedAyekiluaInDOM( 1, pathObj3.data, pathObj3.commands, pathObj3.element,'cryptokeanuSVGneck')
 
 		someHeartBeatPeriod = 1000 * (Math.floor(Math.random() * 32) + 1)
 
@@ -468,8 +471,9 @@ let sketch = (p) => {
 
 	p.windowResized = () => {
 		p.resizeCanvas(p.windowWidth, p.windowHeight)
-		document.getElementById('ayekilua_svg').setAttribute('width', p.windowWidth)
-		document.getElementById('ayekilua_svg').setAttribute('height', p.windowHeight)
+		document.getElementById('cryptokeanuSVG').setAttribute('width', p.windowWidth)
+		document.getElementById('cryptokeanuSVG').setAttribute('height', p.windowHeight)
+
 		p.background(p.random(19, 28), p.random(26, 28), p.random(26, 35), 255)
 	}
 
@@ -484,7 +488,7 @@ let sketch = (p) => {
 				p.rect(0, 0, p.width / 8, altura)
 			}
 			if (elapsedTime > (someHeartBeatPeriod / 8) * 7) {
-				p.background(p.random(19, 28), p.random(26, 28), p.random(26, 35), 12)
+				p.background(p.random(19, 128), p.random(26, 128), p.random(26, 135), 12)
 			}
 			if (elapsedTime > someHeartBeatPeriod) {
 				p.background(p.random(19, 28), p.random(26, 28), p.random(26, 35), 255)
@@ -514,9 +518,9 @@ let sketch = (p) => {
 					((p.height / 2) + (p.height / 4))
 				)
 			}
-			generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-			generateDistortedAyekiluaInDOM( positionActual, pathObj2.data, pathObj2.commands, pathObj2.element)
-			generateDistortedAyekiluaInDOM( positionActual, pathObj3.data, pathObj3.commands, pathObj3.element)
+			generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement,'cryptokeanuSVGhair')
+			generateDistortedAyekiluaInDOM( positionActual, pathObj2.data, pathObj2.commands, pathObj2.element,'cryptokeanuSVGeyes')
+			generateDistortedAyekiluaInDOM( positionActual, pathObj3.data, pathObj3.commands, pathObj3.element,'cryptokeanuSVGneck')
 		}
 	}
 
@@ -601,9 +605,9 @@ let sketch = (p) => {
 		ayekiluaElement.style.fill = tempcol
 		positionActual = (p.mouseY + p.mouseX) / (p.width + p.height)
 		// modifyAyekilua(positionActual)
-		generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-		generateDistortedAyekiluaInDOM(positionActual, pathObj2.data, pathObj2.commands, pathObj2.element)
-		generateDistortedAyekiluaInDOM(positionActual, pathObj3.data, pathObj3.commands, pathObj3.element)
+		generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement,'cryptokeanuSVGhair')
+		generateDistortedAyekiluaInDOM(positionActual, pathObj2.data, pathObj2.commands, pathObj2.element,'cryptokeanuSVGeyes')
+		generateDistortedAyekiluaInDOM(positionActual, pathObj3.data, pathObj3.commands, pathObj3.element,'cryptokeanuSVGneck')
 		let currentJWT = window.localStorage.getItem('userJWT')
 		let oHeader = {
 			alg: 'HS256',
