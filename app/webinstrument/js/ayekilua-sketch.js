@@ -279,6 +279,9 @@ let sketch = (p) => {
 	let xoff = 1.0
 	let ayekiluaPoints3DArray
 	let ayekiluaCommands
+	let pathObj2
+	let pathObj3
+
 	let positionActual = 0.0
 	let elapsedTime
 	let tempcol = `#33ffccff`
@@ -447,13 +450,17 @@ let sketch = (p) => {
 			}
 		)
 
-		pathObj = getPathDataFromDOMById('ayekiluaSVGPath')
+		let pathObj1 = getPathDataFromDOMById('ayekiluaSVGPath')
+		pathObj2 = getPathDataFromDOMById('ayekiluaSVGPath02')
+		pathObj3 = getPathDataFromDOMById('ayekiluaSVGPath03')
 
-		ayekiluaPoints3DArray = pathObj.data
-		ayekiluaCommands = pathObj.commands
-		ayekiluaElement = pathObj.element
+		ayekiluaPoints3DArray = pathObj1.data
+		ayekiluaCommands = pathObj1.commands
+		ayekiluaElement = pathObj1.element
 
 		generateDistortedAyekiluaInDOM( 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+		generateDistortedAyekiluaInDOM( 1, pathObj2.data, pathObj2.commands, pathObj2.element)
+		generateDistortedAyekiluaInDOM( 1, pathObj3.data, pathObj3.commands, pathObj3.element)
 
 		someHeartBeatPeriod = 1000 * (Math.floor(Math.random() * 32) + 1)
 
@@ -508,6 +515,8 @@ let sketch = (p) => {
 				)
 			}
 			generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
+			generateDistortedAyekiluaInDOM( positionActual, pathObj2.data, pathObj2.commands, pathObj2.element)
+			generateDistortedAyekiluaInDOM( positionActual, pathObj3.data, pathObj3.commands, pathObj3.element)
 		}
 	}
 
@@ -587,11 +596,14 @@ let sketch = (p) => {
 		started = true
 		ayekiluaElement.style.display = "flow-root"
 		tempcol = "#" + makeHexString(8)
+		pathObj2.element.style.fill = "#" + makeHexString(8)
+		pathObj3.element.style.fill = "#" + makeHexString(8)
 		ayekiluaElement.style.fill = tempcol
 		positionActual = (p.mouseY + p.mouseX) / (p.width + p.height)
 		// modifyAyekilua(positionActual)
 		generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-	
+		generateDistortedAyekiluaInDOM(positionActual, pathObj2.data, pathObj2.commands, pathObj2.element)
+		generateDistortedAyekiluaInDOM(positionActual, pathObj3.data, pathObj3.commands, pathObj3.element)
 		let currentJWT = window.localStorage.getItem('userJWT')
 		let oHeader = {
 			alg: 'HS256',
