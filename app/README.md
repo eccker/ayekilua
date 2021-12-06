@@ -1,15 +1,11 @@
-# Basic Sample Hardhat Project
+# Basic Sample Ayekilua Project
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+This project is the base Ayekilua engine. It comes with with socket.io communications and p5js setup so is very simple to start build on top of it.
 
-Try running some of the following tasks:
 
 ```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
+npm install
+npm run dev
+npn run build
+npm run start
 ```
