@@ -1,4 +1,7 @@
-
+app/webinstrument/build/es6-bundled/assets/NFT.json
+app/webinstrument/build/es6-bundled/assets/NFTMarket.json
+app/webinstrument/build/es6-bundled/assets/ayekilua_en.json
+app/webinstrument/build/es6-bundled/**
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
 

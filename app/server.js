@@ -156,6 +156,9 @@ const server = app.use(serveStatic(__dirname + serverPath)).listen(port, () => {
 
 // -------- Cloud App, business logic 
 let io = require('socket.io')(server, {
+    cors: {
+        origin: '*',
+    },
 	transports: ['websocket'],
 	allowRequest: (handshake, callback) => {
 		var cookie, token, authPair, parts;
@@ -227,7 +230,7 @@ io.on('connection', (socket) => {
 		}
 		
 		io.emit(`color`, decoded2.user.color)
-		io.emit(`position`, [decoded2.user.mouseX, decoded2.user.mouseY])
+		io.emit(`position`, [decoded2.user.mouseY, decoded2.user.mouseY, Math.random()*4])
 		io.to(socket.id).emit(`habitat`, `Good job user ID: ` + id)
 	})
 })

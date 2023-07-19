@@ -266,7 +266,7 @@ let sketch = (p) => {
 	let words
 	let glBandera = false
 	let frase = ` `
-	let started = true
+	let started = false
 	let canvasApp
 	let nft = `ayekilua_`
 
@@ -276,11 +276,45 @@ let sketch = (p) => {
 	let fraseDiv
 	let noiseScale = 0.02
 
-	let xoff = 1.0
+	let xoff = 0.0
+    let yoff = 0.0
 	let ayekiluaPoints3DArray
 	let ayekiluaCommands
-	let pathObj2
-	let pathObj3
+	let pathObj01
+    let pathObj02
+	let pathObj03
+	let pathObj04
+	let pathObj05
+	let pathObj06
+	let pathObj07
+	let pathObj08
+	let pathObj09
+	let pathObj10
+	let pathObj11
+	let pathObj12
+	let pathObj13
+	let pathObj14
+	let pathObj15
+	let pathObj16
+	let pathObj17
+	let pathObj18
+	let pathObj19
+	let pathObj20
+	let pathObj21
+	let pathObj22
+	let pathObj23
+	let pathObj24
+	let pathObj25
+	let pathObj26
+	let pathObj27
+	let pathObj28
+	let pathObj29
+	let pathObj30
+	let pathObj31
+	let pathObj32
+	let pathObj33
+	let pathObj34
+
 
 	let positionActual = 0.0
 	let elapsedTime
@@ -295,10 +329,20 @@ let sketch = (p) => {
 		}
 		return result
 	}
-
+    
 	let modifyShapeByDistortion = (_distortion, _shapeData3DArray) => {
-		let modifiedShapeData3DArray = []
+        const dimensions = [
+            _shapeData3DArray.length,
+            _shapeData3DArray.reduce((x, y) => Math.max(x, y.length), 0)
+        ];
 
+        //  console.log(`dimensions0`, dimensions)
+        //  console.log(`dimensions1`, _shapeData3DArray.length)
+        //  console.log(`dimensions2`, _shapeData3DArray[0].length)
+        //  console.log(`dimensions3`, _shapeData3DArray[0])
+
+		let modifiedShapeData3DArray = []
+        
 		for (let jj = 0; jj < _shapeData3DArray.length; jj++) {
 			modifiedShapeData3DArray[jj] = []
 			for (let kk = 0; kk < _shapeData3DArray[jj].length; kk++) {
@@ -306,13 +350,31 @@ let sketch = (p) => {
 				for (let ll = 0; ll < _shapeData3DArray[jj][kk].length; ll++) {
 					const currentPoint = parseFloat(_shapeData3DArray[jj][kk][ll])
 					if (!isNaN(currentPoint)) {
-						xoff = xoff - 0.618
-						let n = p.noise(xoff) * 0.618382 * p.map(_distortion, 0, 2, -128, 128)
-						modifiedShapeData3DArray[jj][kk][ll] = parseInt(currentPoint + n)
+						if(ll === 0) {
+                            xoff = xoff + 0.5
+                            let n = p.noise(xoff) + currentPoint + p.map(_distortion, 0, 1, -10,10) 
+                            // let n = p.noise(xoff) * currentPoint
+                            // let n = 0;
+                            // if(jj<1 && kk < 1){
+                            //     console.log(`xoff        : `, xoff)
+                            //     console.log(`punto actual: `, currentPoint)
+                            //     console.log(`punto n     : `, n)
+                            // }
+                            
+                            let volado = p.random(p.random(-256, 0), 1)
+                            volado>0?modifiedShapeData3DArray[jj][kk][ll] = parseFloat(n):modifiedShapeData3DArray[jj][kk][ll] = parseFloat(currentPoint)
+                        } else {
+                            yoff = yoff + 0.5
+                            let n = p.noise(yoff) + currentPoint + p.map(_distortion, 0, 1, -10,10) 
+                            let volado = p.random(p.random(-256, 0), 1)
+                            volado>0?modifiedShapeData3DArray[jj][kk][ll] = parseFloat(n):modifiedShapeData3DArray[jj][kk][ll] = parseFloat(currentPoint)
+                        }
 					}
 				}
 			}
 		}
+        // console.log(`modifiedShapeData3DArray`, modifiedShapeData3DArray)
+        // return _shapeData3DArray
 		return modifiedShapeData3DArray
 	}
 
@@ -321,12 +383,12 @@ let sketch = (p) => {
 		for (let ii = 0; ii < _DPathCommands.length; ii++) {
 			let commType = _DPathCommands[ii][0]
 			let verifLast1 = _DPathCommands[ii][_DPathCommands[ii].length - 1]
-			let verifLast2 = _DPathCommands[ii][_DPathCommands[ii].length - 2]
+			// let verifLast2 = _DPathCommands[ii][_DPathCommands[ii].length - 2]
 			let reconstructedCommand = commType // init with command type
 			for (let i = 0; i < shapeData3DArrayToConvert[ii].length; i++) {
 				reconstructedCommand += " " + (shapeData3DArrayToConvert[ii][i].toString())
 			}
-			if (verifLast1 == 'z' || verifLast2 == 'z') {
+			if (verifLast1 === 'z' || verifLast1 === 'Z') {
 				reconstructedCommand += " " + 'z'
 			}
 			ayekiluaPathModifiedArray.push(reconstructedCommand)
@@ -337,18 +399,46 @@ let sketch = (p) => {
 	}
 
 	let getPathDataFromDOMById = (svgPathId) => {
+        
 		let element = document.getElementById(svgPathId)
 		let path = element.getAttribute('d')
-		let commands = path.split(/(?=[lmcLMC])/)
-		let result = commands.map((cmd) => {
-			let pointsArray = cmd.slice(0, -1).split(' ')
-			let pairsArray = []
-			for (let i = 1; i < pointsArray.length; i += 1) {
-				let pairToPush = pointsArray[i].split(',')
-				if (pairToPush != 'z') {
-					pairsArray.push(pairToPush)
-				}
-			}
+		let commandsArgsArray = path.replace(/-/g,' -').replace(/,/g,' ').split(/(?=[lmcLMCvVhHzZsSqQTtaA])/)
+        // console.log(`commandsArray::::::::::::`, commandsArgsArray)
+        let commands = []
+		let result = commandsArgsArray.map((cmd, index) => {
+            let pairsArray = []
+            const regexZero = /[zZ]/;
+            const regex = /-?\d+(\.\d+)?/g;
+            commands[index] = cmd[0]
+            // console.log(`cmd is: `, cmd)
+
+    		let elementToPush
+            if(regexZero.test(cmd[0])){
+                elementToPush = ' '
+            }else{
+                elementToPush = cmd.slice(1).match(regex).map(Number)
+
+            }
+            // console.log(`elemento to PUSH`, elementToPush)
+            pairsArray.push(elementToPush)
+
+			// let pointsArray = cmd.slice(1).split(' ')
+			// let pairsArray = []
+			// for (let i = 0; i < pointsArray.length; i += 1) {
+            //     if(cmd[0] === 'Z' || cmd[0] === 'z'){
+            //         continue;
+            //     }
+			// 	const elementToPush = cmd.slice(1).match(regex).map(Number)
+            //     console.log(`elementoTOPUSH`, elementToPush)
+            //     const regexTwo = /[lLmM]/;
+            //     const regexFour = /[sSqQ]/;
+            //     const regexSix = /[cC]/;
+            //     const regexOne = /[vVhH]/;
+            //     if(regexZero.test(cmd[0])){
+            //         elementToPush = ' '
+            //     }
+            //     pairsArray[index] = elementToPush
+			// }
 			return pairsArray
 		})
 		return {
@@ -402,7 +492,7 @@ let sketch = (p) => {
 		canvasApp.id('canvas')
 		canvasApp.position(0, 0, 'fixed')
 		p.select('#initialDiv') ? p.select('#initialDiv').remove() : null
-		p.frameRate(24)
+		p.frameRate(6)
 		p.background(127) // clear the screen
 		socket = io({
 			transports: ['websocket']
@@ -411,7 +501,7 @@ let sketch = (p) => {
 			console.log(`Este cliente se ha conectado `);
 		})
 		socket.on('disconnect', () => {
-			// socket.removeAllListeners()
+			socket.removeAllListeners()
 		})
 		socket.on('color',
 			(data) => {
@@ -450,17 +540,84 @@ let sketch = (p) => {
 			}
 		)
 
-		let pathObj1 = getPathDataFromDOMById('ayekiluaSVGPath')
-		pathObj2 = getPathDataFromDOMById('ayekiluaSVGPath02')
-		pathObj3 = getPathDataFromDOMById('ayekiluaSVGPath03')
+		pathObj01 = getPathDataFromDOMById('AyekiluaSVGBrazoIzquierdo')
+		pathObj02 = getPathDataFromDOMById('AyekiluaSVGPiernaIzquierda')
+		pathObj03 = getPathDataFromDOMById('AyekiluaSVGPiernaDerecha')
 
-		ayekiluaPoints3DArray = pathObj1.data
-		ayekiluaCommands = pathObj1.commands
-		ayekiluaElement = pathObj1.element
+		pathObj04 = getPathDataFromDOMById('AyekiluaSVGRellenoCara')
+		pathObj05 = getPathDataFromDOMById('AyekiluaSVGParpadoDerecho')
+		pathObj06 = getPathDataFromDOMById('AyekiluaSVGSombraUnoParpadoDerecho')
+		pathObj07 = getPathDataFromDOMById('AyekiluaSVGSombraParpadoDerecho')
+		pathObj08 = getPathDataFromDOMById('AyekiluaSVGOjoDerecho')
+        pathObj09 = getPathDataFromDOMById('AyekiluaSVGParpadoIzquierdo')
+		pathObj10 = getPathDataFromDOMById('AyekiluaSVGOjoIzquierdo')
+		// pathObj11 = getPathDataFromDOMById('AyekiluaSVGNarizIzquierda')
+		// pathObj12 = getPathDataFromDOMById('AyekiluaSVGLabioInferior')
+		pathObj13 = getPathDataFromDOMById('AyekiluaSVGCejaPomuloLabioSuperior')
+        pathObj14 = getPathDataFromDOMById('AyekiluaSVGNarizDerecha')
+		pathObj15 = getPathDataFromDOMById('AyekiluaSVGBranquiaSuperiorIzquierda')
+		pathObj16 = getPathDataFromDOMById('AyekiluaSVGBranquiaSuperiorIzquierdaSombra')
+		pathObj17 = getPathDataFromDOMById('AyekiluaSVGBranquiaMediaIzquierdaSombra')
+		pathObj18 = getPathDataFromDOMById('AyekiluaSVGBranquiaMediaIzquierda')
+        pathObj19 = getPathDataFromDOMById('AyekiluaSVGBranquiaInferiorIzquierdaSombra')
+		pathObj20 = getPathDataFromDOMById('AyekiluaSVGBranquiaInferiorIzquierda')
+		pathObj21 = getPathDataFromDOMById('AyekiluaSVGAletaDorsal')
+		pathObj22 = getPathDataFromDOMById('AyekiluaSVGAbdomen')
+		pathObj23 = getPathDataFromDOMById('AyekiluaSVGCola')
+        pathObj24 = getPathDataFromDOMById('AyekiluaSVGPlieguesAbdomen')
+		pathObj25 = getPathDataFromDOMById('AyekiluaSVGCuerpoCompleto')
+		pathObj26 = getPathDataFromDOMById('AyekiluaSVGPiernaDerecha')
+		pathObj27 = getPathDataFromDOMById('AyekiluaSVGLuzPiernaDerecha')
+		pathObj28 = getPathDataFromDOMById('AyekiluaSVGBrazoDerecho')
+        pathObj29 = getPathDataFromDOMById('AyekiluaSVGBranquiaSuperiorDerechaSombra')
+		pathObj30 = getPathDataFromDOMById('AyekiluaSVGBrankiaSuperiorDerecha')
+		pathObj31 = getPathDataFromDOMById('AyekiluaSVGBranquiaMediaDerechaSombra')
+		pathObj32 = getPathDataFromDOMById('AyekiluaSVGBranquiaMediaDerecha')
+		pathObj33 = getPathDataFromDOMById('AyekiluaSVGBranquiaInferiorDerechaSombra')
+        pathObj34 = getPathDataFromDOMById('AyekiluaSVGBranquiaInferiorDerecha')
+
+
+
+		ayekiluaPoints3DArray = pathObj01.data
+        console.log(`AQUI ayekiluaPoints3DArray: `, ayekiluaPoints3DArray)
+		ayekiluaCommands = pathObj01.commands
+		ayekiluaElement = pathObj01.element
 
 		generateDistortedAyekiluaInDOM( 1, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-		generateDistortedAyekiluaInDOM( 1, pathObj2.data, pathObj2.commands, pathObj2.element)
-		generateDistortedAyekiluaInDOM( 1, pathObj3.data, pathObj3.commands, pathObj3.element)
+		generateDistortedAyekiluaInDOM( 1, pathObj02.data, pathObj02.commands, pathObj02.element)
+		generateDistortedAyekiluaInDOM( 1, pathObj03.data, pathObj03.commands, pathObj03.element)
+
+        generateDistortedAyekiluaInDOM( 1, pathObj04.data, pathObj04.commands, pathObj04.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj05.data, pathObj05.commands, pathObj05.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj06.data, pathObj06.commands, pathObj06.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj07.data, pathObj07.commands, pathObj07.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj08.data, pathObj08.commands, pathObj08.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj09.data, pathObj09.commands, pathObj09.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj10.data, pathObj10.commands, pathObj10.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj11.data, pathObj11.commands, pathObj11.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj12.data, pathObj12.commands, pathObj12.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj13.data, pathObj13.commands, pathObj13.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj14.data, pathObj14.commands, pathObj14.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj15.data, pathObj15.commands, pathObj15.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj16.data, pathObj16.commands, pathObj16.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj17.data, pathObj17.commands, pathObj17.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj18.data, pathObj18.commands, pathObj18.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj19.data, pathObj19.commands, pathObj19.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj20.data, pathObj20.commands, pathObj20.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj21.data, pathObj21.commands, pathObj21.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj22.data, pathObj22.commands, pathObj22.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj23.data, pathObj23.commands, pathObj23.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj24.data, pathObj24.commands, pathObj24.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj25.data, pathObj25.commands, pathObj25.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj26.data, pathObj26.commands, pathObj26.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj27.data, pathObj27.commands, pathObj27.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj28.data, pathObj28.commands, pathObj28.element)
+        generateDistortedAyekiluaInDOM( 1, pathObj29.data, pathObj29.commands, pathObj29.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj30.data, pathObj30.commands, pathObj30.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj31.data, pathObj31.commands, pathObj31.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj32.data, pathObj32.commands, pathObj32.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj33.data, pathObj33.commands, pathObj33.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj34.data, pathObj34.commands, pathObj34.element)
 
 		someHeartBeatPeriod = 1000 * (Math.floor(Math.random() * 32) + 1)
 
@@ -515,8 +672,35 @@ let sketch = (p) => {
 				)
 			}
 			generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-			generateDistortedAyekiluaInDOM( positionActual, pathObj2.data, pathObj2.commands, pathObj2.element)
-			generateDistortedAyekiluaInDOM( positionActual, pathObj3.data, pathObj3.commands, pathObj3.element)
+			generateDistortedAyekiluaInDOM( positionActual, pathObj02.data, pathObj02.commands, pathObj02.element)
+			generateDistortedAyekiluaInDOM( positionActual, pathObj03.data, pathObj03.commands, pathObj03.element)
+
+            generateDistortedAyekiluaInDOM( positionActual, pathObj04.data, pathObj04.commands, pathObj04.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj05.data, pathObj05.commands, pathObj05.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj06.data, pathObj06.commands, pathObj06.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj07.data, pathObj07.commands, pathObj07.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj08.data, pathObj08.commands, pathObj08.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj09.data, pathObj09.commands, pathObj09.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj10.data, pathObj10.commands, pathObj10.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj11.data, pathObj11.commands, pathObj11.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj12.data, pathObj12.commands, pathObj12.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj13.data, pathObj13.commands, pathObj13.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj14.data, pathObj14.commands, pathObj14.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj15.data, pathObj15.commands, pathObj15.element)
+            // generateDistortedAyekiluaInDOM( 1, pathObj16.data, pathObj16.commands, pathObj16.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj17.data, pathObj17.commands, pathObj17.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj18.data, pathObj18.commands, pathObj18.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj19.data, pathObj19.commands, pathObj19.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj20.data, pathObj20.commands, pathObj20.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj21.data, pathObj21.commands, pathObj21.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj22.data, pathObj22.commands, pathObj22.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj23.data, pathObj23.commands, pathObj23.element)
+            generateDistortedAyekiluaInDOM( positionActual/2, pathObj24.data, pathObj24.commands, pathObj24.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj25.data, pathObj25.commands, pathObj25.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj26.data, pathObj26.commands, pathObj26.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj27.data, pathObj27.commands, pathObj27.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj28.data, pathObj28.commands, pathObj28.element)
+            generateDistortedAyekiluaInDOM( positionActual, pathObj29.data, pathObj29.commands, pathObj29.element)
 		}
 	}
 
@@ -596,14 +780,42 @@ let sketch = (p) => {
 		started = true
 		ayekiluaElement.style.display = "flow-root"
 		tempcol = "#" + makeHexString(8)
-		pathObj2.element.style.fill = "#" + makeHexString(8)
-		pathObj3.element.style.fill = "#" + makeHexString(8)
+		pathObj02.element.style.fill = "#" + makeHexString(8)
+		pathObj03.element.style.fill = "#" + makeHexString(8)
 		ayekiluaElement.style.fill = tempcol
-		positionActual = (p.mouseY + p.mouseX) / (p.width + p.height)
+		positionActual = p.random( ((p.mouseY) / (p.height))-.1, ((p.mouseY) / (p.height))+.12)
+        // console.log(`DEBUG: positionActual: `,positionActual)
 		// modifyAyekilua(positionActual)
 		generateDistortedAyekiluaInDOM(positionActual, ayekiluaPoints3DArray, ayekiluaCommands, ayekiluaElement)
-		generateDistortedAyekiluaInDOM(positionActual, pathObj2.data, pathObj2.commands, pathObj2.element)
-		generateDistortedAyekiluaInDOM(positionActual, pathObj3.data, pathObj3.commands, pathObj3.element)
+		generateDistortedAyekiluaInDOM(positionActual, pathObj02.data, pathObj02.commands, pathObj02.element)
+		generateDistortedAyekiluaInDOM(positionActual, pathObj03.data, pathObj03.commands, pathObj03.element)
+
+        generateDistortedAyekiluaInDOM( positionActual, pathObj04.data, pathObj04.commands, pathObj04.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj05.data, pathObj05.commands, pathObj05.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj06.data, pathObj06.commands, pathObj06.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj07.data, pathObj07.commands, pathObj07.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj08.data, pathObj08.commands, pathObj08.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj09.data, pathObj09.commands, pathObj09.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj10.data, pathObj10.commands, pathObj10.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj11.data, pathObj11.commands, pathObj11.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj12.data, pathObj12.commands, pathObj12.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj13.data, pathObj13.commands, pathObj13.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj14.data, pathObj14.commands, pathObj14.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj15.data, pathObj15.commands, pathObj15.element)
+        // generateDistortedAyekiluaInDOM( 1, pathObj16.data, pathObj16.commands, pathObj16.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj17.data, pathObj17.commands, pathObj17.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj18.data, pathObj18.commands, pathObj18.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj19.data, pathObj19.commands, pathObj19.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj20.data, pathObj20.commands, pathObj20.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj21.data, pathObj21.commands, pathObj21.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj22.data, pathObj22.commands, pathObj22.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj23.data, pathObj23.commands, pathObj23.element)
+        generateDistortedAyekiluaInDOM( positionActual/2, pathObj24.data, pathObj24.commands, pathObj24.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj25.data, pathObj25.commands, pathObj25.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj26.data, pathObj26.commands, pathObj26.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj27.data, pathObj27.commands, pathObj27.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj28.data, pathObj28.commands, pathObj28.element)
+        generateDistortedAyekiluaInDOM( positionActual, pathObj29.data, pathObj29.commands, pathObj29.element)
 		let currentJWT = window.localStorage.getItem('userJWT')
 		let oHeader = {
 			alg: 'HS256',
