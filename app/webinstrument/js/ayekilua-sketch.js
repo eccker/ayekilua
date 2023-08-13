@@ -719,6 +719,10 @@ let sketch = (p) => {
 		if (p.key === 'f') {
 			finishMinting()
 		}
+        if (p.key === 'R') {
+            someHeartBeatPeriod = 0
+		}
+        
 		if (p.key === 's') {
 			// setStamp()
 			let userSelectedToken = prompt(`Which tokenId do you want to buy?`)
